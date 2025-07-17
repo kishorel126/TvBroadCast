@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TvBroadCast.DataAccess\TvBroadCast.DataAccess.csproj" />
+    <ProjectReference Include="..\TvBroadCast.Services\TvBroadCast.Services.csproj" />
   </ItemGroup>
 
 </Project>

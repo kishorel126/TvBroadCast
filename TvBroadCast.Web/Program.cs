@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using TvBroadCast.DataAccess.DbContext;
+using TvBroadCast.DataAccess.Repositories;
 using TvBroadCast.DataAccess.Seed;
 using TvBroadCast.Domain.Entities;
+using TvBroadCast.Domain.Interfaces.IBroadCast;
+using TvBroadCast.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -49,6 +51,10 @@ builder.Services.ConfigureApplicationCookie(options => {
     options.SlidingExpiration = true;
 });
 
+
+//Adding the dependencies
+builder.Services.AddScoped<IBroadCastRepository , BroadCastRepository>();
+builder.Services.AddScoped<IBroadCastService, BroadCastService>();
 
 
 var app = builder.Build();

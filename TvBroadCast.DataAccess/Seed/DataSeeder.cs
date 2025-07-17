@@ -88,7 +88,7 @@ namespace TvBroadCast.DataAccess.Seed
                     Description = "Daily news broadcast in the morning time",
                     StartTime = DateTime.Now.AddHours(8),
                     EndTime = DateTime.Now.AddHours(9),
-                    Status = BroadcastStatus.Approved,
+                    Status = BroadCastStatus.BStatus.Approved,
                     SchedulerId = schedulerUser.Id,
                     ApproverId = approverUser.Id,
                     ApproverComment = "Scheduled and Approved for broadcast."
@@ -103,7 +103,7 @@ namespace TvBroadCast.DataAccess.Seed
                     BroadcastId = broadcast.Id,
                     ApproverId = approverUser.Id,
                     Timestamp = DateTime.Now,
-                    Status = BroadcastStatus.Approved,
+                    Status = BroadCastStatus.BStatus.Approved,
                     Comment = "The morning news from 8 to 9, Looks gooda!"
                 };
 
