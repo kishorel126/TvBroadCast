@@ -10,12 +10,12 @@ namespace TvBroadCast.DataAccess.Seed
     {
 
         private readonly AppDbContext _context;
-        private readonly UserManager<User> _userManager;
+        private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
 
 
         // Dependency injection constructor
-        public DataSeeder(AppDbContext context, UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
+        public DataSeeder(AppDbContext context, UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             _context = context;
             _userManager = userManager;
@@ -43,18 +43,18 @@ namespace TvBroadCast.DataAccess.Seed
             }
 
             //Seeding Test Users
-            var schedulerUser = new User { 
+            var schedulerUser = new IdentityUser { 
                 UserName = "scheduler1",
                 Email = "scheduler1@tvbroadcast.com"
             };
 
-            var approverUser = new User
+            var approverUser = new IdentityUser
             {
                 UserName = "approver1",
                 Email = "approver1@tvbroadcast.com"
             };
 
-            var adminUser = new User
+            var adminUser = new IdentityUser
             {
                 UserName = "admin1",
                 Email = "admin1@tvbroadcast.com"

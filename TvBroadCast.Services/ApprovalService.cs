@@ -84,7 +84,7 @@ namespace TvBroadCast.Services
             return (true, "");
         }
 
-        public async Task<List<ApprovalHistory>> GetApprovalHistoryForBroadcastAsync(int broadcastId)
+        public async Task<List<ApprovalHistory>> GetApprovalHistoryForBroadCastAsync(int broadcastId)
         {
             return await _approvalRepository.GetHistoryForBroadcastAsync(broadcastId);
         }

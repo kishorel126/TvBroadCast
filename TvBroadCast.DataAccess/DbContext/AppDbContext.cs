@@ -5,7 +5,7 @@ using TvBroadCast.Domain.Entities;
 
 namespace TvBroadCast.DataAccess.DbContext
 {
-    public class AppDbContext : IdentityDbContext<User>
+    public class AppDbContext : IdentityDbContext
     {
 
         public AppDbContext(DbContextOptions<AppDbContext> options)
@@ -13,7 +13,7 @@ namespace TvBroadCast.DataAccess.DbContext
         {
         }
 
-        public DbSet<User> Users { get; set; } //IdentityUser
+        //public DbSet<User> Users { get; set; } //IdentityUser
 
         public DbSet<BroadCast> BroadCasts { get; set; } // Broadcast entity
 

@@ -14,7 +14,7 @@ namespace TvBroadCast.Domain.Interfaces.IBroadCast
 
         Task<BroadCast?> GetBroadCastByIdAsync(int id);
 
-        Task<(bool Success, string Error)> AddBroadcastAsync(BroadCast broadCast);
+        Task<(bool Success, string Error)> AddBroadCastAsync(BroadCast broadCast);
 
         Task<(bool Success, string Error)> UpdateBroadCastAsync(BroadCast broadCast);
 

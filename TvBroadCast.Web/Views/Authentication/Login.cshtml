@@ -1,0 +1,357 @@
+﻿@using TvBroadCast.Web.Models.ViewModel
+
+@model LoginViewModel
+
+@{
+    ViewData["Title"] = "Login";
+    Layout = "_Layout";
+}
+
+@section Styles {
+    <style>
+        .account-page {
+            padding: 50px 0;
+            background: #f8f8f8;
+            min-height: 80vh;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.09);
+            padding: 32px 24px;
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .col-2 {
+            flex: 1 1 250px;
+            min-width: 220px;
+            text-align: center;
+            padding: 16px;
+        }
+
+            .col-2 img {
+                max-width: 100%;
+                border-radius: 10px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            }
+
+        .regFormContainer {
+            max-width: 320px;
+            margin: 0 auto;
+            background: #fafafa;
+            border-radius: 10px;
+            padding: 28px 18px 18px 18px;
+            box-shadow: 0 1px 8px rgba(255,82,59,0.07);
+        }
+
+        #loginForm label {
+            font-weight: 500;
+            margin-bottom: 6px;
+            display: block;
+            color: #333;
+            text-align: left;
+        }
+
+        #loginForm input[type="text"],
+        #loginForm input[type="password"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+            margin-bottom: 8px;
+            background: #fff;
+            transition: border 0.2s;
+        }
+
+        #loginForm input:focus {
+            border: 1.5px solid #ff5e42;
+            outline: none;
+        }
+
+        .btn {
+            width: 100%;
+            background: black;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.2s, transform 0.2s;
+            box-shadow: 0 2px 8px rgba(255,82,59,0.10);
+        }
+
+            .btn:hover {
+                background: black;
+                transform: scale(1.03);
+            }
+
+        .validation-message {
+            color: black;
+            font-size: 0.98rem;
+            margin-bottom: 8px;
+            min-height: 18px;
+            display: block;
+            text-align: left;
+        }
+
+        .regFormContainer a {
+            color: black;
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+            .regFormContainer a:hover {
+                color: #d8432b;
+            }
+
+        @@media (max-width: 700px) {
+            .container {
+                padding: 12px 2px;
+            }
+
+            .row {
+                flex-direction: column;
+            }
+
+            .col-2 {
+                padding: 8px;
+            }
+        }
+    </style>
+}
+
+
+<div class="account-page">
+    <div class="container">
+        <div class="row">
+            <div class="col-2">
+                <img src="~/images/base.png" />
+            </div>
+            <div class="col-2">
+                <div class="">
+                    <div class="regFormContainer">
+                        <!-- Login Form -->
+                        <form id="loginForm" style="display: block;" method="post" asp-action="Login" asp-controller="Authentication" autocomplete="off">
+                            @Html.AntiForgeryToken()
+                            <label for="Email">Email</label>
+                            <input type="text" id="Email" name="Email" value="@Model?.Email" required />
+                            <span class="validation-message" id="loginEmailError"></span>
+                            <label for="loginPassword">Password</label>
+                            <input type="password" id="loginPassword" name="Password" required />
+                            <span class="validation-message" id="loginPasswordError"></span>
+                            <span class="validation-message" id="loginServerError"></span>
+                            <button type="submit" class="btn">Login</button>
+                        </form>
+                        <div>
+                            <a asp-controller="Authentication" asp-action="Register">Dont have an account? </a>
+                            <div class="mt-2" id="forgotPasswordLinkContainer" style="cursor:pointer;">
+                                <a data-bs-toggle="modal" data-bs-target="#forgotPasswordModal">Forget Password?</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="forgotPasswordForm">
+                    <div class="header">
+                        <h5>Reset Password</h5>
+                    </div>
+                    <div class="modal-body">
+                        <div id="step-1">
+                            <label>Email</label>
+                            <input type="email" name="Email" class="form-control mb-3" id="forgotPasswordEmail" required />
+                            <button type="button" class="btn" id="forgotPasswordSendCodeButton">Send code</button>
+
+                            <div class="mt-2" id="forgotPasswordLinkContainer" style="cursor:pointer;">
+                                <a id="goToStep2Link">Already have the code?</a>
+                            </div>
+
+                        </div>
+                        <div id="step-2" style="display:none;">
+
+                            <label>Verification Code</label>
+                            <input type="text" name="VerificationCode" class="form-control mb-3" id="forgotPasswordCode" required />
+
+                            <label>New Password</label>
+                            <input type="password" name="NewPassord" class="form-control mb-3" id="forgotPasswordNewPassword" required />
+
+                            <label>Confirm Password</label>
+                            <input type="password" name="ConfirmPassword" class="form-control mb-3" id="forgotPasswordConfirmPassword" required />
+
+                            <button type="submit" class="btn w-100">Reset Password</button>
+                        </div>
+
+                        <div id="forgotPasswordError" class="text-danger mt-2"></div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('loginForm');
+            const email = document.getElementById('Email');
+            const password = document.getElementById('loginPassword');
+
+            const emailError = document.getElementById('loginEmailError');
+            const passwordError = document.getElementById('loginPasswordError');
+            const serverError = document.getElementById('loginServerError');
+
+            const sendCodeButton = document.getElementById("forgotPasswordSendCodeButton");
+            const forgotPasswordForm = document.getElementById("forgotPasswordForm");
+
+            const goToStep2 = document.getElementById("goToStep2Link");
+
+            const step1 = document.getElementById("step-1");
+            const step2 = document.getElementById("step-2");
+
+            function validateEmail() {
+                const value = email.value.trim();
+                if (!value) {
+                    emailError.textContent = "Email is required.";
+                    return false;
+                }
+                if (!/^[^@@\s]+@@[^@@\s]+\.[^@@\s]+$/.test(value)) {
+                    emailError.textContent = "Enter a valid email address.";
+                    return false;
+                }
+                emailError.textContent = "";
+                return true;
+            }
+
+            function validatePassword() {
+                if (!password.value) {
+                    passwordError.textContent = "Password is required.";
+                    return false;
+                }
+                passwordError.textContent = "";
+                return true;
+            }
+
+            email.addEventListener('input', validateEmail);
+            password.addEventListener('input', validatePassword);
+
+            form.addEventListener('submit', async function (e) {
+                let valid = true;
+                serverError.textContent = "";
+                if (!validateEmail()) valid = false;
+                if (!validatePassword()) valid = false;
+                if (!valid) {
+                    e.preventDefault();
+                    return;
+                }
+
+                e.preventDefault();
+                const formData = new FormData(form);
+                try {
+                    const response = await fetch(form.action, {
+                        method: "POST",
+                        headers: {
+                            "RequestVerificationToken": form.querySelector('input[name="__RequestVerificationToken"]').value
+                        },
+                        body: formData
+                    });
+                    const text = await response.text();
+                    if (response.redirected) {
+                        window.location.href = response.url;
+                    } else if (text.includes("Invalid login attempt")) {
+                        serverError.textContent = "Incorrect email or password.";
+
+                        const forgotPasswordLinkContainer = document.getElementById("forgotPasswordLinkContainer");
+                        if(forgotPasswordLinkContainer){
+                            forgotPasswordLinkContainer.style.display = "block";
+                        }
+                    } else {
+                        document.open();
+                        document.write(text);
+                        document.close();
+                    }
+                } catch (err) {
+                    serverError.textContent = "An error occurred. Please try again.";
+                }
+            });
+
+            // Reset Password
+            if(sendCodeButton && forgotPasswordForm){
+
+                sendCodeButton.addEventListener("click", function () {
+                    const email = document.getElementById("forgotPasswordEmail").value;
+                    axios.post("/Account/SendForgotPasswordCode", { email })
+                    .then((response) => {
+                        console.log("Success response: ", response);
+
+                        step1.style.display = "none";
+                        step2.style.display = "block";
+                        document.getElementById("forgotPasswordError").textContent = "";
+                    })
+                    .catch((error) => {
+                        console.log("Error:", error);
+                        document.getElementById("forgotPasswordError").textContent = "Failed to send code. Check your email.";
+                    });
+                });
+
+                forgotPasswordForm.addEventListener("submit", function (e) {
+                    e.preventDefault();
+
+                    const email = document.getElementById("forgotPasswordEmail").value;
+                    const code = document.getElementById("forgotPasswordCode").value;
+                    const newPassword = document.getElementById("forgotPasswordNewPassword").value;
+                    const confirmPassword = document.getElementById("forgotPasswordConfirmPassword").value;
+
+                    if (newPassword != confirmPassword) {
+                        document.getElementById("forgotPasswordError").textContent = "Passwords don't match";
+                        return;
+                    }
+
+                    axios.post("/Account/ForgotPassword", {
+                        email,  code , newPassword
+                    }).then(resp => {
+                        if (resp.data.success) {
+                            alert("Password reset successfully. Redirecting... ");
+                            window.location.href = "Login";
+                        } else {
+                            document.getElementById("forgotPasswordError").textContent = "Invalid code or expired";
+                        }
+                    }).catch(() => {
+                        document.getElementById("forgotPasswordError").textContent = "Reset failed. Try again later";
+                    });
+                });
+
+                // Handle skip to step-2 link
+                if(goToStep2 && step1 && step2){
+                    goToStep2.addEventListener("click", function(e) {
+                        e.preventDefault();
+                        step1.style.display = "none";
+                        step2.style.display = "block";
+                        document.getElementById("forgotPasswordError").textContent = "";
+                    });
+                }
+            }
+        });
+    </script>
+}

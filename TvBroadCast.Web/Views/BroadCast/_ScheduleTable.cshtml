@@ -1,0 +1,46 @@
+﻿@model List<TvBroadCast.Domain.Entities.BroadCast>
+
+@{
+    var windowStart = (DateTime)ViewBag.WindowStart;
+    var windowEnd = (DateTime)ViewBag.WindowEnd;
+    var slotMinutes = 30;
+    var totalSlots = (int)((windowEnd - windowStart).TotalMinutes / slotMinutes);
+    var slotTimes = Enumerable.Range(0, totalSlots + 1)
+        .Select(i => windowStart.AddMinutes(i * slotMinutes))
+        .ToList();
+    bool isScheduler = User.IsInRole("Scheduler");
+    bool isApprover = User.IsInRole("Approver");
+}
+
+
+<tbody>
+    @foreach (var broadcast in Model)
+    {
+        <tr data-broadcastid="@broadcast.Id">
+            <td>@broadcast.Title</td>
+            @foreach (var slot in slotTimes)
+            {
+                bool inRange = broadcast.StartTime <= slot && broadcast.EndTime > slot;
+                <td class="@(inRange ? "bg-info" : "")"></td>
+            }
+            <td>
+                <span class="badge @(broadcast.Status == TvBroadCast.Domain.Entities.BroadCastStatus.BStatus.Approved ? "bg-success" : broadcast.Status == TvBroadCast.Domain.Entities.BroadCastStatus.BStatus.Pending ? "bg-warning" : "bg-danger")">
+                    @broadcast.Status
+                </span>
+            </td>
+            <td>
+                @if (isScheduler)
+                {
+                    <button class="btn btn-sm btn-primary edit-broadcast-btn">Edit</button>
+                    <button class="btn btn-sm btn-danger delete-broadcast-btn">Delete</button>
+                }
+                @if (isApprover && broadcast.Status == TvBroadCast.Domain.Entities.BroadCastStatus.BStatus.Pending)
+                {
+                    <button class="btn btn-sm btn-success approve-broadcast-btn">Approve</button>
+                    <button class="btn btn-sm btn-danger reject-broadcast-btn">Reject</button>
+                }
+                <button class="btn btn-sm btn-info history-broadcast-btn">History</button>
+            </td>
+        </tr>
+    }
+</tbody>

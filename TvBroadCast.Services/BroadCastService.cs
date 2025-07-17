@@ -25,7 +25,7 @@ namespace TvBroadCast.Services
             return await _broadCastRepository.GetBroadCastByIdAsync(id);
         }
 
-        public async Task<(bool Success , string Error)> AddBroadcastAsync(BroadCast broadCast)
+        public async Task<(bool Success , string Error)> AddBroadCastAsync(BroadCast broadCast)
         {
 
             //Validating the start and end time --- no overlap

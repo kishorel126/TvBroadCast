@@ -1,0 +1,299 @@
+﻿@using TvBroadCast.Web.Models.ViewModel
+
+@model RegisterViewModel
+
+@{
+    ViewData["Title"] = "Register";
+    Layout = "_Layout";
+}
+
+@section Styles {
+    <style>
+        .account-page {
+            padding: 50px 0;
+            background: #f8f8f8;
+            min-height: 80vh;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.09);
+            padding: 32px 24px;
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .col-2 {
+            flex: 1 1 250px;
+            min-width: 220px;
+            text-align: center;
+            padding: 16px;
+        }
+
+            .col-2 img {
+                max-width: 100%;
+                border-radius: 10px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            }
+
+        .regFormContainer {
+            max-width: 320px;
+            margin: 0 auto;
+            background: #fafafa;
+            border-radius: 10px;
+            padding: 28px 18px 18px 18px;
+            box-shadow: 0 1px 8px rgba(255,82,59,0.07);
+        }
+
+        #registerForm label {
+            font-weight: 500;
+            margin-bottom: 6px;
+            display: block;
+            color: #333;
+            text-align: left;
+        }
+
+        #registerForm input[type="text"],
+        #registerForm input[type="password"],
+        #registerForm input[type="email"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+            margin-bottom: 8px;
+            background: #fff;
+            transition: border 0.2s;
+        }
+
+        #registerForm input:focus {
+            border: 1.5px solid #ff5e42;
+            outline: none;
+        }
+
+        .btn {
+            width: 100%;
+            background: black;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.2s, transform 0.2s;
+            box-shadow: 0 2px 8px rgba(255,82,59,0.10);
+        }
+
+            .btn:hover {
+                background: black;
+                transform: scale(1.03);
+            }
+
+        .validation-message {
+            color: black;
+            font-size: 0.98rem;
+            margin-bottom: 8px;
+            min-height: 18px;
+            display: block;
+            text-align: left;
+        }
+
+        .regFormContainer a {
+            color: black;
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+            .regFormContainer a:hover {
+                color: #d8432b;
+            }
+
+        @@media (max-width: 700px) {
+            .container {
+                padding: 12px 2px;
+            }
+
+            .row {
+                flex-direction: column;
+            }
+
+            .col-2 {
+                padding: 8px;
+            }
+        }
+    </style>
+}
+
+
+
+
+
+<div class="account-page">
+    <div class="container">
+        <div class="row">
+            <div class="col-2">
+                <img src="~/images/base.png" />
+            </div>
+            <div class="col-2">
+                <div class="">
+                    <div class="regFormContainer">
+                        <!-- Register Form -->
+                        <form id="registerForm" style="display: block;" method="post" asp-action="Register" asp-controller="Authentication" autocomplete="off">
+                            @Html.AntiForgeryToken()
+                            <label for="Username">Username</label>
+                            <input type="text" id="Fullname" name="Username" value="@Model?.UserName" required />
+                            <span class="validation-message" id="registerFullnameError"></span>
+                            <label for="Email">Email</label>
+                            <input type="text" id="Email" name="Email" value="@Model?.Email" required />
+                            <span class="validation-message" id="registerEmailError"></span>
+                            <label for="registerPassword">Password</label>
+                            <input type="password" id="registerPassword" name="Password" required />
+                            <span class="validation-message" id="registerPasswordError"></span>
+                            <label for="registerConfirmPassword">Confirm Password</label>
+                            <input type="password" id="registerConfirmPassword" name="ConfirmPassword" required />
+                            <span class="validation-message" id="registerConfirmPasswordError"></span>
+                            <span class="validation-message" id="registerServerError"></span>
+                            <button type="submit" class="btn">Register</button>
+                        </form>
+                        <div>
+                            <a asp-controller="Authentication" asp-action="Login">Already have an account?</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('registerForm');
+            const fullname = document.getElementById('Fullname');
+            const email = document.getElementById('Email');
+            const password = document.getElementById('registerPassword');
+            const confirmPassword = document.getElementById('registerConfirmPassword');
+            const fullnameError = document.getElementById('registerFullnameError');
+            const emailError = document.getElementById('registerEmailError');
+            const passwordError = document.getElementById('registerPasswordError');
+            const confirmPasswordError = document.getElementById('registerConfirmPasswordError');
+            const serverError = document.getElementById('registerServerError');
+
+            function validateFullname() {   
+                const value = fullname.value.trim();
+                if (!value) {
+                    fullnameError.textContent = "Full name is required.";
+                    return false;
+                }
+                fullnameError.textContent = "";
+                return true;
+            }
+
+            function validateEmail() {
+                const value = email.value.trim();
+                if (!value) {
+                    emailError.textContent = "Email is required.";
+                    return false;
+                }
+                if (!/^[^@@\s]+@@[^@@\s]+\.[^@@\s]+$/.test(value)) {
+                    emailError.textContent = "Enter a valid email address.";
+                    return false;
+                }
+                emailError.textContent = "";
+                return true;
+            }
+
+            function validatePassword() {
+                const value = password.value;
+                let msg = "";
+                if (!value) msg = "Password is required.";
+                else if (value.length < 8) msg = "Password must be at least 8 characters.";
+                else if (!/[A-Z]/.test(value)) msg = "Password must contain an uppercase letter.";
+                else if (!/[a-z]/.test(value)) msg = "Password must contain a lowercase letter.";
+                else if (!/[0-9]/.test(value)) msg = "Password must contain a digit.";
+                else if (!/[^A-Za-z0-9]/.test(value)) msg = "Password must contain a special character.";
+                passwordError.textContent = msg;
+                return !msg;
+            }
+
+            function validateConfirmPassword() {
+                if (confirmPassword.value !== password.value) {
+                    confirmPasswordError.textContent = "Passwords do not match.";
+                    return false;
+                }
+                confirmPasswordError.textContent = "";
+                return true;
+            }
+
+            fullname.addEventListener('input', validateFullname);
+            email.addEventListener('input', validateEmail);
+            password.addEventListener('input', validatePassword);
+            confirmPassword.addEventListener('input', validateConfirmPassword);
+
+                    form.addEventListener('submit', async function (e) {
+                let valid = true;
+                serverError.textContent = "";
+                if (!validateFullname()) valid = false;
+                if (!validateEmail()) valid = false;
+                if (!validatePassword()) valid = false;
+                if (!validateConfirmPassword()) valid = false;
+                if (!valid) {
+                    e.preventDefault();
+                    return;
+                }
+
+                // AJAX register
+                e.preventDefault();
+                const formData = new FormData(form);
+                try {
+                    const response = await fetch(form.action, {
+                        method: "POST",
+                        headers: {
+                            "RequestVerificationToken": form.querySelector('input[name="__RequestVerificationToken"]').value,
+                            "X-Requested-With": "XMLHttpRequest"
+                        },
+                        body: formData
+                    });
+
+                    // Try to parse as JSON
+                    let data = null;
+                    try {
+                        data = await response.json();
+                    } catch {
+                        // Not JSON, fallback
+                    }
+
+                    if (data && typeof data === 'object') {
+                        if (data.success) {
+                            window.location.href = data.redirectUrl || "/";
+                        } else if (data.errors && data.errors.length > 0) {
+                            serverError.textContent = data.errors[0]; // Show first error, or loop to show all
+                        } else {
+                            serverError.textContent = "Registration failed. Please check your details.";
+                        }
+                    } else {
+                        // fallback: reload page with server response
+                        const text = await response.text();
+                        document.open();
+                        document.write(text);
+                        document.close();
+                    }
+                } catch (err) {
+                    serverError.textContent = "An error occurred. Please try again.";
+                }
+            });
+        });
+    </script>
+}

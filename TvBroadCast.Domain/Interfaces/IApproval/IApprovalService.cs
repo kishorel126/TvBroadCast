@@ -14,7 +14,7 @@ namespace TvBroadCast.Domain.Interfaces.IApproval
 
         Task<(bool Success, string Error)> RejectBroadCastAsync(int broadcastId, string approverId, string comment);
 
-        Task<List<ApprovalHistory>> GetApprovalHistoryForBroadcastAsync(int broadcastId);
+        Task<List<ApprovalHistory>> GetApprovalHistoryForBroadCastAsync(int broadcastId);
 
     }
 }

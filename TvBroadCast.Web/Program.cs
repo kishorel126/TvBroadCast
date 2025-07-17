@@ -1,9 +1,13 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Mail;
 using TvBroadCast.DataAccess.DbContext;
 using TvBroadCast.DataAccess.Repositories;
 using TvBroadCast.DataAccess.Seed;
 using TvBroadCast.Domain.Entities;
+using TvBroadCast.Domain.Interfaces.IAdmin;
+using TvBroadCast.Domain.Interfaces.IApproval;
 using TvBroadCast.Domain.Interfaces.IBroadCast;
 using TvBroadCast.Services;
 
@@ -24,7 +28,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 
 //Add IdentityServices
-builder.Services.AddIdentity<User, IdentityRole>(options =>
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 {
 
     //Customizing the Identity options
@@ -38,8 +42,7 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
     .AddDefaultTokenProviders();
 
 // Adding the dependencies
-builder.Services.AddTransient<DataSeeder>();
-
+builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 
 //Configuring the cookie settings ---> Handles authentication cookies and configurations
@@ -55,7 +58,11 @@ builder.Services.ConfigureApplicationCookie(options => {
 //Adding the dependencies
 builder.Services.AddScoped<IBroadCastRepository , BroadCastRepository>();
 builder.Services.AddScoped<IBroadCastService, BroadCastService>();
-
+builder.Services.AddScoped<IApprovalRepository , ApprovalRepository>();
+builder.Services.AddScoped<IApprovalService , ApprovalService>();
+builder.Services.AddScoped<IAdminRepository , AdminRepository>();
+builder.Services.AddScoped<IAdminService , AdminService>();
+builder.Services.AddTransient<DataSeeder>();
 
 var app = builder.Build();
 
@@ -79,14 +86,16 @@ app.UseSession();
 // For authenticating users based on the configured authentication scheme
 app.UseAuthentication();
 
-// For authorizing requests based on the configured roles
-app.UseAuthorization();
+
 
 //For redirecting the HTTP requests to HTTPS
 app.UseHttpsRedirection();
 
 //For routing requests to the appropraite endpoints
 app.UseRouting();
+
+// For authorizing requests based on the configured roles
+app.UseAuthorization();
 
 
 app.MapStaticAssets();

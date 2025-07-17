@@ -1,17 +1,28 @@
-﻿<!DOCTYPE html>
+﻿
+@using Microsoft.AspNetCore.Identity
+@using TvBroadCast.Domain.Entities
+
+@inject Microsoft.AspNetCore.Identity.SignInManager<IdentityUser> signInManager
+
+
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - TvBroadCast</title>
-    <script type="importmap"></script>
+    <style>
+        @@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+    </style>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/TvBroadCast.styles.css" asp-append-version="true" />
+    @RenderSection("Styles" , required:false)
 </head>
 
 <body>
+    
+    @* <div id="preloader"></div> *@
 
 
     <header>
@@ -30,6 +41,41 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+                        @if (signInManager.IsSignedIn(User))
+                        {
+                        if (User.IsInRole("Admin"))
+                        {
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Index">Admin</a>
+                        </li>
+                        }
+                        else if (User.IsInRole("Scheduler"))
+                        {
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="BroadCast" asp-action="Index">Scheduler</a>
+                        </li>
+                        }
+                        else if (User.IsInRole("Approver"))
+                        {
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Broadcast" asp-action="Index">Approver</a>
+                        </li>
+                        }
+                        }
+                        @if(signInManager.IsSignedIn(User))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Authentication" asp-action="LogOut">Log Out</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Authentication" asp-action="Login">Login</a>
+                            </li>
+                        }
+                        
+                
                     </ul>
                 </div>
             </div>
@@ -46,11 +92,12 @@
 
 
     <footer class="border-top footer text-muted">
-        <div class="container">
+        <div class="container" style="justify-content:center;">
             &copy; 2025 - TvBroadCast - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
