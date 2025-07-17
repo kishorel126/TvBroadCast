@@ -1,0 +1,112 @@
+# Build Results
+bin/
+obj/
+out/
+[Bb]uild/
+[Bb]uild[Ll]og.*
+
+# Rider / VS Code / Visual Studio
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# ASP.NET Core specific
+appsettings.Development.json
+appsettings.Local.json
+appsettings.*.json
+secrets.json
+.env
+.env.*
+
+# Entity Framework Migrations
+Migrations/
+
+# MySQL related
+*.db
+*.sql
+*.bak
+*.mdf
+*.ldf
+
+# Logs and crash dumps
+*.log
+*.tlog
+*.pidb
+*.svclog
+*.nlog
+*.err
+*.stackdump
+*.vspscc
+*.vssscc
+
+# Temporary and cache files
+*.tmp
+*.temp
+*.cache
+*.bak
+*.orig
+*.swp
+*.swo
+*.DS_Store
+Thumbs.db
+
+# DotNet Watch
+*.dotnetwatch.json
+
+# JetBrains Rider / Resharper
+*.DotSettings.user
+_ReSharper*/
+*.resharper
+resharper.log
+
+# NuGet
+*.nupkg
+*.snupkg
+*.nuspec
+packages/
+project.lock.json
+project.fragment.lock.json
+*.symbols.nupkg
+
+# Test results
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# Publish output
+publish/
+wwwroot/dist/
+wwwroot/node_modules/
+node_modules/
+
+# Layered Architecture Folders (you might structure them like this)
+**/Domain/bin/
+**/Domain/obj/
+**/Application/bin/
+**/Application/obj/
+**/Infrastructure/bin/
+**/Infrastructure/obj/
+**/WebUI/bin/
+**/WebUI/obj/
+
+# User Secrets
+**/.vs/
+
+# Docker
+docker-compose.override.yml
+docker-compose*.yml
+docker-compose*.yaml
+Dockerfile.*
+docker-compose.*.env
+.dockerignore
+
+# Optional: Exclude compiled Razor views if precompiled
+**/obj/**/*.cshtml.cs
+
+# SQLite (if used temporarily)
+*.sqlite
+*.sqlite3
