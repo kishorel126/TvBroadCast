@@ -13,35 +13,75 @@
     var broadcasts = Model ?? new List<TvBroadCast.Domain.Entities.BroadCast>();
 }
 
+<div class="container-fluid mt-3">
+    <h4 class="mb-4">Broadcast Schedule Overview</h4>
 
-<tbody>
-    @foreach (var broadcast in broadcasts)
-    {
-        <tr data-broadcastid="@broadcast.Id">
-            <td>@broadcast.Title</td>
-            @foreach (var slot in slotTimes)
-            {
-                bool inRange = broadcast.StartTime <= slot && broadcast.EndTime > slot;
-                <td class="@(inRange ? "bg-info" : "")"></td>
-            }
-            <td>
-                <span class="badge @(broadcast.Status == TvBroadCast.Domain.Entities.BroadCastStatus.BStatus.Approved ? "bg-success" : broadcast.Status == TvBroadCast.Domain.Entities.BroadCastStatus.BStatus.Pending ? "bg-warning" : "bg-danger")">
-                    @broadcast.Status
-                </span>
-            </td>
-            <td>
-                @if (isScheduler)
+    <div class="table-responsive">
+        <table class="table table-bordered text-center align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Title</th>
+                    @foreach (var slot in slotTimes)
+                    {
+                        <th style="min-width: 90px;">@slot.ToString("HH:mm")</th>
+                    }
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var broadcast in broadcasts)
                 {
-                    <button class="btn btn-sm btn-primary edit-broadcast-btn">Edit</button>
-                    <button class="btn btn-sm btn-danger delete-broadcast-btn">Delete</button>
+                    <tr data-broadcastid="@broadcast.Id">
+                        <td class="fw-semibold">@broadcast.Title</td>
+
+                        @foreach (var slot in slotTimes)
+                        {
+                            bool inRange = broadcast.StartTime <= slot && broadcast.EndTime > slot;
+                            <td class="@(inRange ? "bg-info text-white" : "")"></td>
+                        }
+
+                    <td>
+                        <span class="badge
+                                @(broadcast.Status == TvBroadCast.Domain.Entities.BroadCastStatus.BStatus.Approved ? "bg-success" :
+                                                                broadcast.Status == TvBroadCast.Domain.Entities.BroadCastStatus.BStatus.Pending ? "bg-warning text-dark" :
+                                                                "bg-danger")">
+                            @broadcast.Status
+                        </span>
+                    </td>
+
+                        <td>
+                        @if (isScheduler)
+                            {
+                                <button class="btn btn-sm btn-primary edit-broadcast-btn mb-1">Edit</button>
+                                <button class="btn btn-sm btn-danger delete-broadcast-btn mb-1">Delete</button>
+                            }
+                            @if (isApprover && broadcast.Status == TvBroadCast.Domain.Entities.BroadCastStatus.BStatus.Pending)
+                            {
+                                <button class="btn btn-sm btn-success approve-broadcast-btn mb-1">Approve</button>
+                                <button class="btn btn-sm btn-danger reject-broadcast-btn mb-1">Reject</button>
+                            }
+                        </td>
+                    </tr>
                 }
-                @if (isApprover && broadcast.Status == TvBroadCast.Domain.Entities.BroadCastStatus.BStatus.Pending)
-                {
-                    <button class="btn btn-sm btn-success approve-broadcast-btn">Approve</button>
-                    <button class="btn btn-sm btn-danger reject-broadcast-btn">Reject</button>
-                }
-                @* <button class="btn btn-sm btn-info history-broadcast-btn">History</button> *@
-            </td>
-        </tr>
-    }
-</tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/broadcastHub")
+            .build();
+
+        connection.on("BroadcastUpdated", function () {
+            location.reload(); // Reload to reflect live changes
+        });
+
+        connection.start().catch(function (err) {
+            return console.error(err.toString());
+        });
+    </script>
+}

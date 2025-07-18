@@ -2,49 +2,162 @@
 @{
     ViewBag.Title = "Add Broadcast";
 }
-<h2>Add Broadcast</h2>
-<div id="result-message"></div>
-<form id="create-form" autocomplete="off">
-    <div class="form-group">
-        <label asp-for="Title"></label>
-        <input asp-for="Title" class="form-control" />
-        <span asp-validation-for="Title" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Description"></label>
-        <textarea asp-for="Description" class="form-control"></textarea>
-        <span asp-validation-for="Description" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="StartTime"></label>
-        <input asp-for="StartTime" type="datetime-local" class="form-control" />
-        <span asp-validation-for="StartTime" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="EndTime"></label>
-        <input asp-for="EndTime" type="datetime-local" class="form-control" />
-        <span asp-validation-for="EndTime" class="text-danger"></span>
-    </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-</form>
+<style>
+    body {
+        background-color: #f9fafb;
+    }
+
+    .broadcast-container {
+        max-width: 600px;
+        margin: 40px auto;
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+    }
+
+        .broadcast-container h2 {
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: #343a40;
+        }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-weight: 500;
+        color: #495057;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    input[type="text"],
+    input[type="datetime-local"],
+    textarea {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #ced4da;
+        border-radius: 10px;
+        background-color: #fdfdfd;
+        font-size: 15px;
+        transition: border-color 0.3s;
+    }
+
+        input:focus,
+        textarea:focus {
+            border-color: #4f46e5;
+            outline: none;
+            background-color: #fff;
+        }
+
+    .text-danger {
+        font-size: 0.85em;
+        color: #e3342f;
+        margin-top: 5px;
+        display: block;
+    }
+
+    .btn {
+        padding: 10px 22px;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 15px;
+        transition: background-color 0.3s;
+    }
+
+    .btn-primary {
+        background-color: #4f46e5;
+        color: #fff;
+        border: none;
+    }
+
+        .btn-primary:hover {
+            background-color: #4338ca;
+        }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        color: #fff;
+        border: none;
+        margin-left: 10px;
+    }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+    #result-message {
+        margin-bottom: 20px;
+    }
+
+    @@media (max-width: 600px) {
+        .broadcast-container
+
+    {
+        margin: 20px;
+        padding: 20px;
+    }
+
+    }
+</style>
+
+<div class="broadcast-container">
+    <h2>Add Broadcast</h2>
+    <div id="result-message"></div>
+
+    <form id="create-form" autocomplete="off">
+        <div class="form-group">
+            <label asp-for="Title"></label>
+            <input asp-for="Title" class="form-control" />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Description"></label>
+            <textarea asp-for="Description" class="form-control"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="StartTime"></label>
+            <input asp-for="StartTime" type="datetime-local" class="form-control" />
+            <span asp-validation-for="StartTime" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="EndTime"></label>
+            <input asp-for="EndTime" type="datetime-local" class="form-control" />
+            <span asp-validation-for="EndTime" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Submit</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+
     <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/broadcastHub")
+            .build();
+
+        connection.start().catch(err => console.error("SignalR start error: ", err));
+
         $(function () {
             $("#create-form").submit(function (e) {
                 e.preventDefault();
 
                 var form = $(this);
 
-                // Convert datetime-local input to ISO string for backend compatibility
                 function toISO(input) {
                     var val = form.find("[name='" + input + "']").val();
-                    // If empty, return null
                     if (!val) return null;
-                    // If it ends with 'Z' or includes 'T', it's likely ISO already
                     if (val.endsWith('Z') || val.indexOf('T') >= 0) return val;
-                    // Otherwise, replace space with T and append :00 if needed
                     return val.replace(' ', 'T') + (val.length === 16 ? ":00" : "");
                 }
 
@@ -63,7 +176,13 @@
                     success: function (res) {
                         if (res.success) {
                             $("#result-message").html('<div class="alert alert-success">' + res.message + '</div>');
-                            setTimeout(function () { window.location.href = '@Url.Action("Index", "Scheduler")'; }, 1200);
+
+                            connection.invoke("BroadcastChanged")
+                                .catch(err => console.error("SignalR invoke error: ", err));
+
+                            setTimeout(function () {
+                                window.location.href = '@Url.Action("Index", "Scheduler")';
+                            }, 1200);
                         } else {
                             let errorMsg = res.error || (res.errors ? res.errors.join("<br>") : "Unknown error");
                             $("#result-message").html('<div class="alert alert-danger">' + errorMsg + '</div>');
@@ -76,7 +195,6 @@
             });
         });
     </script>
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+
+    @await Html.PartialAsync("_ValidationScriptsPartial")
 }

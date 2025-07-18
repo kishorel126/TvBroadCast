@@ -63,7 +63,7 @@ namespace TvBroadCast.DataAccess.Repositories
         {
             
 
-            return   _context.BroadCasts
+            return _context.BroadCasts
                 .Where(b => (b.StartTime < windowEnd) && (b.EndTime > windowStart) && (b.Status == BroadCastStatus.BStatus.Approved))
                 .OrderBy(b => b.StartTime)
                 .ToList();

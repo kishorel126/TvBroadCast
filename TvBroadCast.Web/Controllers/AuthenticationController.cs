@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using TvBroadCast.Domain.Entities;
+using TvBroadCast.Web.Hubs;
 using TvBroadCast.Web.Models.ViewModel;
 
 namespace TvBroadCast.Web.Controllers
@@ -13,12 +15,14 @@ namespace TvBroadCast.Web.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly IEmailSender _emailSender;
+        private readonly IHubContext<BroadcastHub> _hubContext;
 
-        public AuthenticationController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager , IEmailSender emailSender)
+        public AuthenticationController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager , IEmailSender emailSender , IHubContext<BroadcastHub> hubContext)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = _emailSender;
+            _hubContext = hubContext;
         }
 
 

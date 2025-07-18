@@ -2,25 +2,39 @@
 @{
     ViewBag.Title = "Delete Broadcast";
 }
-<h2>Delete Broadcast</h2>
-<div id="result-message"></div>
-<div>
-    <p>Are you sure you want to delete <strong>@Model.Title</strong>?</p>
-    <form id="delete-form">
-        <input type="hidden" name="id" value="@Model.Id" />
-        <button type="submit" class="btn btn-danger">Yes, Delete</button>
-        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-    </form>
+
+<div class="container mt-5">
+    <div class="card shadow-sm border-0 p-4 rounded-3">
+        <h2 class="mb-3 text-danger fw-semibold text-center">Delete Broadcast</h2>
+
+        <div id="result-message" class="mb-3"></div>
+
+        <p class="fs-5 text-center">Are you sure you want to delete <strong class="text-dark">@Model.Title</strong>?</p>
+
+        <form id="delete-form" class="d-flex justify-content-center gap-3 mt-4">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit" class="btn btn-danger px-4 py-2 shadow-sm">Yes, Delete</button>
+            <a asp-action="Index" class="btn btn-secondary px-4 py-2 shadow-sm">Cancel</a>
+        </form>
+    </div>
 </div>
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+
     <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/broadcastHub")
+            .build();
+
+        connection.start().catch(err => console.error('SignalR Connection Error:', err));
+
         $(function () {
             $("#delete-form").submit(function (e) {
                 e.preventDefault();
 
-                var id = $("input[name='id']").val();
+                const id = $("input[name='id']").val();
 
                 $.ajax({
                     url: '@Url.Action("DeleteBroadcast", "Scheduler")',
@@ -29,14 +43,20 @@
                     data: JSON.stringify(id),
                     success: function (res) {
                         if (res.success) {
-                            $("#result-message").html('<div class="alert alert-success">' + res.message + '</div>');
-                            setTimeout(function () { window.location.href = '@Url.Action("Index", "Scheduler")'; }, 1200);
+                            $("#result-message").html('<div class="alert alert-success text-center fw-bold">' + res.message + '</div>');
+
+                            connection.invoke("NotifyBroadcastChange", "deleted", id)
+                                .catch(err => console.error("SignalR notify error:", err));
+
+                            setTimeout(function () {
+                                window.location.href = '@Url.Action("Index", "Scheduler")';
+                            }, 1200);
                         } else {
-                            $("#result-message").html('<div class="alert alert-danger">' + (res.error || "Delete failed.") + '</div>');
+                            $("#result-message").html('<div class="alert alert-danger text-center fw-bold">' + (res.error || "Delete failed.") + '</div>');
                         }
                     },
                     error: function () {
-                        $("#result-message").html('<div class="alert alert-danger">Server error occurred.</div>');
+                        $("#result-message").html('<div class="alert alert-danger text-center fw-bold">Server error occurred.</div>');
                     }
                 });
             });

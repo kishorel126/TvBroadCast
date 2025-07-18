@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using System.Linq;
 using TvBroadCast.Domain.Entities;
 using TvBroadCast.Domain.Interfaces.IBroadCast;
+using Microsoft.AspNetCore.SignalR;
+using TvBroadCast.Web.Hubs;
 
 namespace TvBroadCast.Web.Controllers
 {
@@ -12,10 +14,12 @@ namespace TvBroadCast.Web.Controllers
     public class SchedulerController : Controller
     {
         private readonly IBroadCastService _broadCastService;
+        private readonly IHubContext<BroadcastHub> _hubContext;
 
-        public SchedulerController(IBroadCastService broadCastService)
+        public SchedulerController(IBroadCastService broadCastService , IHubContext<BroadcastHub> hubContext)
         {
             _broadCastService = broadCastService;
+            _hubContext = hubContext;
         }
 
         
@@ -76,8 +80,10 @@ namespace TvBroadCast.Web.Controllers
             var result = await _broadCastService.AddBroadCastAsync(model);
 
             if (result.Success)
+            {
+                await _hubContext.Clients.All.SendAsync("ReceiveUpdate");
                 return Json(new { success = true, message = "Broadcast added successfully." });
-
+            }
             return Json(new { success = false, error = result.Error });
         }
 
@@ -96,7 +102,11 @@ namespace TvBroadCast.Web.Controllers
             var result = await _broadCastService.UpdateBroadCastAsync(model);
 
             if (result.Success)
+            {
+                await _hubContext.Clients.All.SendAsync("ReceiveUpdate");
                 return Json(new { success = true, message = "Broadcast updated successfully." });
+            }
+                
 
             return Json(new { success = false, error = result.Error });
         }
@@ -107,7 +117,11 @@ namespace TvBroadCast.Web.Controllers
         {
             var result = await _broadCastService.DeleteBroadCastAsync(id);
             if (result.Success)
+            {
+                await _hubContext.Clients.All.SendAsync("ReceiveUpdate");
                 return Json(new { success = true, message = "Broadcast deleted successfully." });
+            }
+                
 
             return Json(new { success = false, error = "Failed to delete broadcast." });
         }

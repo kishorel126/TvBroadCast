@@ -2,29 +2,141 @@
 @{
     ViewBag.Title = "Pending Broadcasts";
 }
-<h2>Broadcasts Pending Approval</h2>
-<table class="table table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>Title</th>
-            <th>Start</th>
-            <th>End</th>
-            <th>Scheduler</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var b in Model)
-        {
-            <tr>
-                <td>@b.Title</td>
-                <td>@b.StartTime</td>
-                <td>@b.EndTime</td>
-                <td>@b.SchedulerId</td>
-                <td>
-                    <a href="@Url.Action("Review", new { id = b.Id })" class="btn btn-sm btn-success">Review</a>
-                </td>
-            </tr>
+
+<style>
+    h2 {
+        font-size: 1.8rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    #broadcastsContainer {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        padding: 20px;
+        transition: all 0.3s ease-in-out;
+    }
+
+    table.table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        table.table thead {
+            background-color: #343a40;
+            color: #fff;
         }
-    </tbody>
-</table>
+
+            table.table thead th {
+                padding: 14px;
+                font-weight: 600;
+                font-size: 15px;
+                text-align: center;
+            }
+
+        table.table tbody td {
+            padding: 14px;
+            font-size: 14px;
+            text-align: center;
+            vertical-align: middle;
+            background-color: #fdfdfd;
+            border-bottom: 1px solid #eee;
+        }
+
+        table.table tbody tr:hover {
+            background-color: #f1f1f1;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+    .btn-success {
+        padding: 6px 14px;
+        font-size: 13px;
+        border-radius: 6px;
+        font-weight: 500;
+    }
+
+    /* Responsive Scroll */
+    @@media (max-width: 768px) {
+        #broadcastsContainer
+
+    {
+        overflow-x: auto;
+    }
+
+    table.table {
+        width: 768px;
+    }
+
+    }
+</style>
+
+
+<h2>Broadcasts Pending Approval</h2>
+
+<div id="broadcastsContainer">
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Scheduler</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var b in Model)
+            {
+                <tr>
+                    <td>@b.Title</td>
+                    <td>@b.StartTime</td>
+                    <td>@b.EndTime</td>
+                    <td>@b.SchedulerId</td>
+                    <td>
+                        <a href="@Url.Action("Review", new { id = b.Id })" class="btn btn-sm btn-success">Review</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <!-- Add SignalR -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+
+    <script>
+        // Initialize the connection to the BroadcastHub
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/broadcastHub")
+            .withAutomaticReconnect()
+            .build();
+
+        connection.start()
+            .then(() => console.log("Connected to BroadcastHub"))
+            .catch(err => console.error("SignalR Connection Error: ", err));
+
+        // On event trigger, reload the broadcast list
+        connection.on("broadcastUpdated", function () {
+            console.log("Broadcast update received - refreshing table...");
+            reloadBroadcastTable();
+        });
+
+        function reloadBroadcastTable() {
+            $.ajax({
+                url: '@Url.Action("Index", "Approval")',
+                type: 'GET',
+                success: function (data) {
+                    const dom = $(data); // Load returned HTML
+                    const updatedTable = dom.find('#broadcastsContainer').html();
+                    $('#broadcastsContainer').html(updatedTable);
+                },
+                error: function (xhr, status, error) {
+                    console.error("Failed to refresh broadcasts:", error);
+                }
+            });
+        }
+    </script>
+}

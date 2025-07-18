@@ -1,56 +1,76 @@
 ﻿@model TvBroadCast.Domain.Entities.BroadCast
 @{
     ViewBag.Title = "Edit Broadcast";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<h2>Edit Broadcast</h2>
-<div id="result-message"></div>
-<form id="edit-form" autocomplete="off">
-    <input type="hidden" asp-for="Id" />
-    <div class="form-group">
-        <label asp-for="Title"></label>
-        <input asp-for="Title" class="form-control" />
-        <span asp-validation-for="Title" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Description"></label>
-        <textarea asp-for="Description" class="form-control"></textarea>
-        <span asp-validation-for="Description" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="StartTime"></label>
-        <input asp-for="StartTime" type="datetime-local" class="form-control" />
-        <span asp-validation-for="StartTime" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="EndTime"></label>
-        <input asp-for="EndTime" type="datetime-local" class="form-control" />
-        <span asp-validation-for="EndTime" class="text-danger"></span>
-    </div>
-    <button type="submit" class="btn btn-primary">Save Changes</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-</form>
+
+<div class="container mt-5 mb-4 p-4 shadow rounded bg-light">
+    <h2 class="mb-4 text-center">Edit Broadcast</h2>
+    <div id="result-message"></div>
+
+    <form id="edit-form" autocomplete="off">
+        <input type="hidden" asp-for="Id" />
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label asp-for="Title" class="form-label fw-semibold"></label>
+                <input asp-for="Title" class="form-control" placeholder="Enter Title" />
+                <span asp-validation-for="Title" class="text-danger small"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Description" class="form-label fw-semibold"></label>
+                <textarea asp-for="Description" class="form-control" rows="2" placeholder="Description (optional)"></textarea>
+                <span asp-validation-for="Description" class="text-danger small"></span>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label asp-for="StartTime" class="form-label fw-semibold">Start Time</label>
+                <input asp-for="StartTime" type="datetime-local" class="form-control" />
+                <span asp-validation-for="StartTime" class="text-danger small"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="EndTime" class="form-label fw-semibold">End Time</label>
+                <input asp-for="EndTime" type="datetime-local" class="form-control" />
+                <span asp-validation-for="EndTime" class="text-danger small"></span>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-center gap-3 mt-4">
+            <button type="submit" class="btn btn-primary px-4">Save Changes</button>
+            <a asp-action="Index" class="btn btn-outline-secondary px-4">Cancel</a>
+        </div>
+    </form>
+</div>
+
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
     <script>
         function toISO(input) {
-            // Handles datetime-local conversion to ISO (UTC)
             if (!input) return null;
-            if (input.endsWith('Z') || input.indexOf('T') >= 0) return input;
+            if (input.endsWith('Z') || input.includes('T')) return input;
             return input.replace(' ', 'T') + (input.length === 16 ? ":00" : "");
         }
 
         $(function () {
-            // If model has StartTime/EndTime, ensure input fields are formatted for datetime-local
-            var startVal = '@Model.StartTime.ToString("yyyy-MM-ddTHH:mm")';
-            var endVal = '@Model.EndTime.ToString("yyyy-MM-ddTHH:mm")';
-            $('#StartTime').val(startVal);
-            $('#EndTime').val(endVal);
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/broadcastHub")
+                .build();
+
+            connection.start().catch(err => console.error("SignalR Connection Error:", err));
+
+            // Set date values
+            $('#StartTime').val('@Model.StartTime.ToString("yyyy-MM-ddTHH:mm")');
+            $('#EndTime').val('@Model.EndTime.ToString("yyyy-MM-ddTHH:mm")');
 
             $("#edit-form").submit(function (e) {
                 e.preventDefault();
-
-                var form = $(this);
-                var data = {
+                const form = $(this);
+                const data = {
                     Id: form.find("[name='Id']").val(),
                     Title: form.find("[name='Title']").val(),
                     Description: form.find("[name='Description']").val(),
@@ -66,7 +86,16 @@
                     success: function (res) {
                         if (res.success) {
                             $("#result-message").html('<div class="alert alert-success">' + res.message + '</div>');
-                            setTimeout(function () { window.location.href = '@Url.Action("Index", "Scheduler")'; }, 1200);
+
+                            connection.invoke("BroadcastUpdate", {
+                                id: data.Id,
+                                title: data.Title,
+                                startTime: data.StartTime,
+                                endTime: data.EndTime,
+                                updatedAt: new Date().toISOString()
+                            }).catch(err => console.error("SignalR Invoke Error:", err));
+
+                            setTimeout(() => window.location.href = '@Url.Action("Index", "Scheduler")', 1200);
                         } else {
                             let errorMsg = res.error || (res.errors ? res.errors.join("<br>") : "Unknown error");
                             $("#result-message").html('<div class="alert alert-danger">' + errorMsg + '</div>');

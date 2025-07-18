@@ -1,15 +1,14 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
-using System.Net.Mail;
 using TvBroadCast.DataAccess.DbContext;
 using TvBroadCast.DataAccess.Repositories;
 using TvBroadCast.DataAccess.Seed;
-using TvBroadCast.Domain.Entities;
 using TvBroadCast.Domain.Interfaces.IAdmin;
 using TvBroadCast.Domain.Interfaces.IApproval;
 using TvBroadCast.Domain.Interfaces.IBroadCast;
 using TvBroadCast.Services;
+using TvBroadCast.Web.Hubs;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +17,8 @@ builder.Services.AddSession();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddSignalR();
 
 
 //Registering the DBContext with SQL Server
@@ -107,6 +108,9 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
+
+// Map the SignalR hub to the specified endpoint
+app.MapHub<BroadcastHub>("/broadcastHub");
 
 //Data is seeded at the startup of the application
 using (var scope = app.Services.CreateScope())

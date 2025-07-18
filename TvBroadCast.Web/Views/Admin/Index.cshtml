@@ -6,10 +6,87 @@
     var userRoles = ViewBag.UserRoles as Dictionary<string, IList<string>>;
 }
 
+<style>
+    body {
+        background: #f5f7fa;
+    }
+
+    h2 {
+        margin-bottom: 25px;
+        font-weight: 600;
+        color: #333;
+    }
+
+    #admin-users-table {
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+        #admin-users-table th {
+            background-color: #343a40;
+            color: white;
+            text-align: center;
+            vertical-align: middle;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        #admin-users-table td {
+            vertical-align: middle;
+        }
+
+    .badge {
+        margin-right: 4px;
+    }
+
+    .btn {
+        margin: 2px 0;
+    }
+
+    #admin-message {
+        margin-bottom: 20px;
+        border-left: 6px solid #0d6efd;
+        background: #e9f5ff;
+        padding: 12px;
+        font-weight: 500;
+        border-radius: 5px;
+    }
+
+    .admin-role-select {
+        margin-bottom: 5px;
+    }
+
+    .admin-add-role-btn, .admin-remove-role-btn, .admin-delete-user-btn {
+        min-width: 80px;
+    }
+
+        .admin-remove-role-btn:hover,
+        .admin-add-role-btn:hover,
+        .admin-delete-user-btn:hover {
+            opacity: 0.9;
+        }
+
+    @@media (max-width: 768px) {
+        #admin-users-table th, #admin-users-table td
+
+    {
+        font-size: 0.875rem;
+    }
+
+    .admin-role-select {
+        width: 100% !important;
+    }
+
+    }
+</style>
+
 <h2>Admin Panel - User Management</h2>
 <div id="admin-message" class="alert alert-info" style="display:none;"></div>
 
-<table class="table table-bordered" id="admin-users-table">
+<table class="table table-bordered table-striped" id="admin-users-table">
     <thead>
         <tr>
             <th>User Name</th>
@@ -42,19 +119,25 @@
                             <option value="@role.Name">@role.Name</option>
                         }
                     </select>
-                    <button class="btn btn-primary btn-sm admin-add-role-btn">Add</button>
+                    <button class="btn btn-primary btn-sm admin-add-role-btn">
+                        <i class="bi bi-plus-circle"></i> Add
+                    </button>
                 </td>
                 <td>
                     @if (userRoles != null && userRoles.ContainsKey(user.Id))
                     {
                         foreach (var role in userRoles[user.Id])
                         {
-                            <button class="btn btn-warning btn-sm admin-remove-role-btn" data-rolename="@role">@role</button>
+                            <button class="btn btn-warning btn-sm admin-remove-role-btn" data-rolename="@role">
+                                <i class="bi bi-x-circle"></i> @role
+                            </button>
                         }
                     }
                 </td>
                 <td>
-                    <button class="btn btn-danger btn-sm admin-delete-user-btn">Delete</button>
+                    <button class="btn btn-danger btn-sm admin-delete-user-btn">
+                        <i class="bi bi-trash"></i> Delete
+                    </button>
                 </td>
             </tr>
         }
@@ -63,14 +146,14 @@
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(function() {
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.js"></script>
 
+    <script>
+        $(function () {
             function showMessage(msg) {
                 $("#admin-message").text(msg).fadeIn().delay(2000).fadeOut();
             }
 
-            // Add Role AJAX
             $(".admin-add-role-btn").on("click", function () {
                 var row = $(this).closest('tr');
                 var userId = row.data('userid');
@@ -79,9 +162,9 @@
                     url: '@Url.Action("AddUserToRole", "Admin")',
                     method: 'POST',
                     data: { userId: userId, roleName: roleName },
-                    success: function (result) {
+                    success: function () {
                         showMessage("Role added successfully.");
-                        location.reload(); // Reload to update roles
+                        location.reload();
                     },
                     error: function () {
                         showMessage("Failed to add role.");
@@ -89,7 +172,6 @@
                 });
             });
 
-            // Remove Role AJAX
             $(".admin-remove-role-btn").on("click", function () {
                 var row = $(this).closest('tr');
                 var userId = row.data('userid');
@@ -98,7 +180,7 @@
                     url: '@Url.Action("RemoveUserFromRole", "Admin")',
                     method: 'POST',
                     data: { userId: userId, roleName: roleName },
-                    success: function (result) {
+                    success: function () {
                         showMessage("Role removed successfully.");
                         location.reload();
                     },
@@ -108,7 +190,6 @@
                 });
             });
 
-            // Delete User AJAX
             $(".admin-delete-user-btn").on("click", function () {
                 if (!confirm("Are you sure you want to delete this user?")) return;
                 var row = $(this).closest('tr');
@@ -117,7 +198,7 @@
                     url: '@Url.Action("DeleteUser", "Admin")',
                     method: 'POST',
                     data: { userId: userId },
-                    success: function (result) {
+                    success: function () {
                         showMessage("User deleted successfully.");
                         row.fadeOut(500, function () { $(this).remove(); });
                     },

@@ -3,9 +3,6 @@
 @{
     ViewData["Title"] = "Broadcasts";
     Layout = "_Layout";
-}
-
-@{
     var windowStart = (DateTime)ViewBag.WindowStart;
     var windowEnd = (DateTime)ViewBag.WindowEnd;
     var slotMinutes = 30;
@@ -71,10 +68,12 @@
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+
     <script>
         $(function () {
-            const windowStart = "@windowStart.ToString("")";
-            const windowEnd = "@windowEnd.ToString("")";
+            const windowStart = "@windowStart.ToString("s")";
+            const windowEnd = "@windowEnd.ToString("s")";
 
             function refreshScheduleTable() {
                 $.get("/Broadcast/GetSchedule", { windowStart, windowEnd }, function (data) {
@@ -92,7 +91,7 @@
                 refreshScheduleTable();
             });
 
-            // Auto-refresh every 1 minute 
+            // Auto-refresh every 1 minute
             setInterval(refreshScheduleTable, 60000);
 
             // Initial auto-load when page loads
@@ -117,7 +116,21 @@
                 });
             });
 
-            // TODO: Add similar event handlers for Edit / Approve / Reject / History modals
+            // SignalR client setup
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/broadcastHub")
+                .build();
+
+            connection.on("BroadcastUpdated", function () {
+                console.log("Real-time update received via SignalR");
+                refreshScheduleTable();
+            });
+
+            connection.start().then(function () {
+                console.log("SignalR connected");
+            }).catch(function (err) {
+                console.error("SignalR connection failed: ", err.toString());
+            });
         });
     </script>
 }

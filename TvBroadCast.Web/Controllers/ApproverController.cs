@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using TvBroadCast.Domain.Entities;
 using TvBroadCast.Domain.Interfaces.IApproval;
 using TvBroadCast.Domain.Interfaces.IBroadCast;
+using TvBroadCast.Web.Hubs;
 
 namespace TvBroadCast.Web.Controllers
 {
@@ -13,11 +15,13 @@ namespace TvBroadCast.Web.Controllers
     {
         private readonly IApprovalService _approvalService;
         private readonly IBroadCastService _broadCastService;
+        private readonly IHubContext<BroadcastHub> _hubContext;
 
-        public ApproverController(IApprovalService approvalService, IBroadCastService broadCastService)
+        public ApproverController(IApprovalService approvalService, IBroadCastService broadCastService , IHubContext<BroadcastHub> hubContext)
         {
             _approvalService = approvalService;
             _broadCastService = broadCastService;
+            _hubContext = hubContext;
         }
 
         // List all broadcasts (you can filter as needed)
@@ -46,6 +50,8 @@ namespace TvBroadCast.Web.Controllers
             var result = await _approvalService.ApproveBroadCastAsync(dto.BroadcastId, approverId, dto.Comment);
             if (result.Success)
                 return Ok(new { success = true });
+
+            await _hubContext.Clients.All.SendAsync("ReceiveUpdate");
             return BadRequest(new { success = false, error = result.Error });
         }
 
@@ -57,6 +63,8 @@ namespace TvBroadCast.Web.Controllers
             var result = await _approvalService.RejectBroadCastAsync(dto.BroadcastId, approverId, dto.Comment);
             if (result.Success)
                 return Ok(new { success = true });
+
+            await _hubContext.Clients.All.SendAsync("ReceiveUpdate");
             return BadRequest(new { success = false, error = result.Error });
         }
 

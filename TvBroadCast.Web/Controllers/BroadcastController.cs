@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Threading.Tasks;
 using TvBroadCast.Domain.Interfaces.IBroadCast;
+using TvBroadCast.Web.Hubs;
 
 namespace TvBroadCast.Web.Controllers
 {
@@ -11,7 +13,7 @@ namespace TvBroadCast.Web.Controllers
     {
         private readonly IBroadCastService _broadCastService;
 
-        public BroadcastController(IBroadCastService broadCastService)
+        public BroadcastController(IBroadCastService broadCastService )
         {
             _broadCastService = broadCastService;
         }

@@ -1,38 +1,52 @@
 ﻿@{
     ViewBag.Title = "My Broadcasts";
 }
-<h2>My Broadcasts</h2>
-<a href="@Url.Action("Create")" class="btn btn-primary mb-2">Add New Broadcast</a>
-<div id="broadcast-table-container">
-    <table class="table table-bordered table-striped" id="broadcasts-table">
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Start</th>
-                <th>End</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
-</div>
 
-<!-- Placeholder for result messages -->
-<div id="result-message"></div>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+        <h2 class="mb-2">📺 My Broadcasts</h2>
+        <a href="@Url.Action("Create")" class="btn btn-primary">➕ Add New Broadcast</a>
+    </div>
+
+    <div id="result-message" class="mb-3"></div>
+
+    <div class="table-responsive" id="broadcast-table-container">
+        <table class="table table-bordered table-hover align-middle" id="broadcasts-table">
+            <thead class="table-dark text-center">
+                <tr>
+                    <th>Title</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Status</th>
+                    <th style="width: 160px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="text-center">
+                <!-- Dynamic rows -->
+            </tbody>
+        </table>
+    </div>
+</div>
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+
     <script>
         function formatDateTime(dtString) {
-            // Try to present the datetime in a readable format (fallback to original)
             try {
-                var dt = new Date(dtString);
+                const dt = new Date(dtString);
                 return dt.toLocaleString();
             } catch {
                 return dtString;
             }
+        }
+
+        function showAlert(message, type = "success") {
+            $("#result-message").html(`<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>`);
         }
 
         function loadBroadcasts() {
@@ -50,10 +64,10 @@
                                     <td>${b.title}</td>
                                     <td>${formatDateTime(b.startTime)}</td>
                                     <td>${formatDateTime(b.endTime)}</td>
-                                    <td>${b.status}</td>
+                                    <td><span class="badge bg-${b.status === 'Approved' ? 'success' : b.status === 'Pending' ? 'warning' : 'danger'}">${b.status}</span></td>
                                     <td>
-                                        <a href="@Url.Action("Edit", "Scheduler")?id=${b.id}" class="btn btn-sm btn-info edit-btn" data-id="${b.id}">Edit</a>
-                                        <button class="btn btn-sm btn-danger delete-btn" data-id="${b.id}">Delete</button>
+                                        <a href="@Url.Action("Edit", "Scheduler")?id=${b.id}" class="btn btn-sm btn-outline-primary me-1">Edit</a>
+                                        <button class="btn btn-sm btn-outline-danger delete-btn" data-id="${b.id}">Delete</button>
                                     </td>
                                 </tr>
                             `);
@@ -63,15 +77,14 @@
                     }
                 },
                 error: function () {
-                    alert("Error loading broadcasts.");
+                    showAlert("Error loading broadcasts.", "danger");
                 }
             });
         }
 
-        // Handle Delete button click (AJAX)
         $(document).on('click', '.delete-btn', function (e) {
             e.preventDefault();
-            var id = $(this).data('id');
+            const id = $(this).data('id');
             if (confirm('Are you sure you want to delete this broadcast?')) {
                 $.ajax({
                     url: '@Url.Action("DeleteBroadcast", "Scheduler")',
@@ -80,14 +93,14 @@
                     data: JSON.stringify(id),
                     success: function (res) {
                         if (res.success) {
-                            $("#result-message").html('<div class="alert alert-success">' + res.message + '</div>');
+                            showAlert(res.message, "success");
                             loadBroadcasts();
                         } else {
-                            $("#result-message").html('<div class="alert alert-danger">' + (res.error || "Delete failed.") + '</div>');
+                            showAlert(res.error || "Delete failed.", "danger");
                         }
                     },
                     error: function () {
-                        $("#result-message").html('<div class="alert alert-danger">Delete request failed.</div>');
+                        showAlert("Delete request failed.", "danger");
                     }
                 });
             }
@@ -95,6 +108,22 @@
 
         $(document).ready(function () {
             loadBroadcasts();
+
+            // SignalR Setup
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/broadcastHub")
+                .build();
+
+            connection.start().then(() => {
+                console.log("SignalR connected to BroadcastHub");
+            }).catch(err => {
+                console.error("SignalR connection error:", err.toString());
+            });
+
+            connection.on("BroadcastUpdated", function () {
+                console.log("BroadcastUpdated event received from SignalR");
+                loadBroadcasts(); // Refresh automatically
+            });
         });
     </script>
 }
