@@ -1,13 +1,10 @@
-﻿
-@using Microsoft.AspNetCore.Identity
+﻿@using Microsoft.AspNetCore.Identity
 @using TvBroadCast.Domain.Entities
 
 @inject Microsoft.AspNetCore.Identity.SignInManager<IdentityUser> signInManager
 
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -17,14 +14,10 @@
     </style>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    @RenderSection("Styles" , required:false)
+    @RenderSection("Styles", required: false)
 </head>
 
 <body>
-    
-    @* <div id="preloader"></div> *@
-
-
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
@@ -41,28 +34,37 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Broadcast" asp-action="Index">Broadcast</a>
+                        </li>
                         @if (signInManager.IsSignedIn(User))
                         {
-                        if (User.IsInRole("Admin"))
-                        {
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Index">Admin</a>
-                        </li>
+                            if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Scheduler" asp-action="Index">Scheduler</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Approver" asp-action="Index">Approver</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Index">Admin</a>
+                                </li>
+                            }
+                            else if (User.IsInRole("Scheduler"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Scheduler" asp-action="Index">Scheduler</a>
+                                </li>
+                            }
+                            else if (User.IsInRole("Approver"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Approver" asp-action="Index">Approver</a>
+                                </li>
+                            }
                         }
-                        else if (User.IsInRole("Scheduler"))
-                        {
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="BroadCast" asp-action="Index">Scheduler</a>
-                        </li>
-                        }
-                        else if (User.IsInRole("Approver"))
-                        {
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Broadcast" asp-action="Index">Approver</a>
-                        </li>
-                        }
-                        }
-                        @if(signInManager.IsSignedIn(User))
+                        @if (signInManager.IsSignedIn(User))
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Authentication" asp-action="LogOut">Log Out</a>
@@ -74,22 +76,17 @@
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Authentication" asp-action="Login">Login</a>
                             </li>
                         }
-                        
-                
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
 
-
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
-
-
 
     <footer class="border-top footer text-muted">
         <div class="container" style="justify-content:center;">

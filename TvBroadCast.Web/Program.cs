@@ -47,6 +47,8 @@ builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 //Configuring the cookie settings ---> Handles authentication cookies and configurations
 builder.Services.ConfigureApplicationCookie(options => {
+    options.LoginPath = "/Authentication/Login"; // Redirect to login page if not authenticated
+    options.LogoutPath = "/Authentication/Logout"; // Redirect to logout page
     options.Cookie.HttpOnly = true;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     options.Cookie.SameSite = SameSiteMode.Strict;

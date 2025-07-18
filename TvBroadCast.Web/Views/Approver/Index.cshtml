@@ -1,0 +1,30 @@
+﻿@model IEnumerable<TvBroadCast.Domain.Entities.BroadCast>
+@{
+    ViewBag.Title = "Pending Broadcasts";
+}
+<h2>Broadcasts Pending Approval</h2>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Scheduler</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var b in Model)
+        {
+            <tr>
+                <td>@b.Title</td>
+                <td>@b.StartTime</td>
+                <td>@b.EndTime</td>
+                <td>@b.SchedulerId</td>
+                <td>
+                    <a href="@Url.Action("Review", new { id = b.Id })" class="btn btn-sm btn-success">Review</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -96,15 +96,6 @@ namespace TvBroadCast.Services
 
         }
 
-        public async Task<bool> ApproveBroadCastAsync(BroadCast broadCast)
-        {
-            return false;
-        }
-
-        public async Task<bool> RequestApprovalAsync(BroadCast broadCast)
-        {
-            return false;
-        }
 
         public async Task<List<BroadCast>> GetBroadCastForTimeWindowAsync(DateTime windowStart , DateTime windowEnd)
         {
@@ -114,7 +105,7 @@ namespace TvBroadCast.Services
             {
                 return null;
             }
-            if (windowStart <= windowEnd)
+            if (windowEnd <= windowStart)
             {
                 return null;
             }

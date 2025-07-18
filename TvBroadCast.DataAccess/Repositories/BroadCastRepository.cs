@@ -21,7 +21,7 @@ namespace TvBroadCast.DataAccess.Repositories
 
         public async Task<List<BroadCast>> GetAllAsync()
         {
-            return await _context.BroadCasts.OrderBy(b => b.StartTime).ToListAsync();
+            return  _context.BroadCasts.OrderBy(b => b.StartTime).ToList();
         }
 
         public async Task<BroadCast?> GetBroadCastByIdAsync(int id)
@@ -63,10 +63,10 @@ namespace TvBroadCast.DataAccess.Repositories
         {
             
 
-            return await _context.BroadCasts
+            return   _context.BroadCasts
                 .Where(b => (b.StartTime < windowEnd) && (b.EndTime > windowStart) && (b.Status == BroadCastStatus.BStatus.Approved))
                 .OrderBy(b => b.StartTime)
-                .ToListAsync();
+                .ToList();
         }
 
     }

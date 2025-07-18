@@ -1,5 +1,9 @@
-﻿
-@model List<TvBroadCast.Domain.Entities.BroadCast>
+﻿@model List<TvBroadCast.Domain.Entities.BroadCast>
+
+@{
+    ViewData["Title"] = "Broadcasts";
+    Layout = "_Layout";
+}
 
 @{
     var windowStart = (DateTime)ViewBag.WindowStart;
@@ -15,9 +19,11 @@
 
 <h2>Schedule - Next 4.5 Hours</h2>
 
-<div>
+<div class="d-flex justify-content-between align-items-center mb-2">
     <button id="refreshBtn" class="btn btn-secondary btn-sm">Refresh</button>
+    <small id="lastUpdated" class="text-muted"></small>
 </div>
+
 <table id="schedule-table" class="table table-bordered">
     <thead>
         <tr>
@@ -63,44 +69,55 @@
     </tbody>
 </table>
 
-<!-- Modals for Add/Edit/Approve/Reject/History will be here -->
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        $(function() {
-            // Refresh schedule table
-            $("#refreshBtn").on("click", function () {
-                var windowStart = "@windowStart.ToString("o")";
-                var windowEnd = "@windowEnd.ToString("o")";
-                $.get("@Url.Action("GetSchedule", "Broadcast")", { windowStart, windowEnd }, function(data) {
+        $(function () {
+            const windowStart = "@windowStart.ToString("o")";
+            const windowEnd = "@windowEnd.ToString("o")";
+
+            function refreshScheduleTable() {
+                $.get("/Broadcast/GetSchedule", { windowStart, windowEnd }, function (data) {
                     $("#schedule-table tbody").html($(data).find("tbody").html());
+
+                    const now = new Date();
+                    $("#lastUpdated").text("Last updated: " + now.toLocaleTimeString());
+                }).fail(function (xhr) {
+                    console.error("Auto refresh failed:", xhr.responseText);
                 });
+            }
+
+            // Manual refresh on button click
+            $("#refreshBtn").on("click", function () {
+                refreshScheduleTable();
             });
 
-            // Add, Edit, Delete, Approve, Reject, History logic using AJAX
-            // You would implement modal dialogs and AJAX POSTs to the respective controller endpoints
-            // For example:
-            $(".delete-broadcast-btn").on("click", function() {
+            // Auto-refresh every 1 minute 
+            setInterval(refreshScheduleTable, 6000);
+
+            // Initial auto-load when page loads
+            refreshScheduleTable();
+
+            // Delete button AJAX
+            $(document).on("click", ".delete-broadcast-btn", function () {
                 if (!confirm("Delete broadcast?")) return;
-                var id = $(this).closest("tr").data("broadcastid");
+
+                const id = $(this).closest("tr").data("broadcastid");
                 $.ajax({
                     url: '@Url.Action("Delete", "Broadcast")',
                     method: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify(id),
-                    success: function() {
-                        $("#refreshBtn").click();
+                    success: function () {
+                        refreshScheduleTable();
                     },
-                    error: function(xhr) {
-                        alert(xhr.responseJSON.error);
+                    error: function (xhr) {
+                        alert(xhr.responseJSON?.error || "Deletion failed");
                     }
                 });
             });
 
-            // Similarly, implement AJAX for Edit, Approve, Reject, History
-
-            // Optionally, use setInterval for auto-refresh
-            // setInterval(function(){ $("#refreshBtn").click(); }, 180000);
+            // TODO: Add similar event handlers for Edit / Approve / Reject / History modals
         });
     </script>
 }
