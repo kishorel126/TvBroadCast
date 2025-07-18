@@ -20,7 +20,7 @@ namespace TvBroadCast.Web.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
-            var now = DateTime.UtcNow;
+            var now = DateTime.Now;
             var windowStart = now.AddHours(-2);
             var windowEnd = now.AddHours(2.5);
             var broadcasts = await _broadCastService.GetBroadCastForTimeWindowAsync(windowStart, windowEnd);

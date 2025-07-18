@@ -75,7 +75,7 @@ namespace TvBroadCast.DataAccess.Seed
             }
             if (await _userManager.FindByEmailAsync(adminUser.Email) == null)
             {
-                await _userManager.CreateAsync(adminUser, "Admin@123");
+                await _userManager.CreateAsync(adminUser, "TBCAdmin@123");
                 await _userManager.AddToRoleAsync(adminUser, "Admin");
             }
 
@@ -83,7 +83,7 @@ namespace TvBroadCast.DataAccess.Seed
             //Seeding the sample broadcasts if it doesn't exist
             if (!_context.BroadCasts.Any())
             {
-                var utcNow = DateTime.UtcNow;
+                var Now = DateTime.Now;
 
                 var broadcasts = new List<BroadCast>
 {
@@ -92,8 +92,8 @@ namespace TvBroadCast.DataAccess.Seed
     {
         Title = "Headline Update",
         Description = "Midday news featuring global updates.",
-        StartTime = utcNow.AddMinutes(-15),
-        EndTime = utcNow.AddMinutes(15),
+        StartTime = Now.AddMinutes(-15),
+        EndTime = Now.AddMinutes(15),
         Status = BroadCastStatus.BStatus.Pending,
         SchedulerId = schedulerUser.Id,
         ApproverId = approverUser.Id,
@@ -105,8 +105,8 @@ namespace TvBroadCast.DataAccess.Seed
     {
         Title = "Early Morning Recap",
         Description = "Highlights from 6AM - 7AM.",
-        StartTime = utcNow.AddHours(-6),
-        EndTime = utcNow.AddHours(-5),
+        StartTime = Now.AddHours(-6),
+        EndTime = Now.AddHours(-5),
         Status = BroadCastStatus.BStatus.Approved,
         SchedulerId = schedulerUser.Id,
         ApproverId = approverUser.Id,
@@ -118,8 +118,8 @@ namespace TvBroadCast.DataAccess.Seed
     {
         Title = "Pre-Prime Analysis",
         Description = "Show discusses trends before major prime time.",
-        StartTime = utcNow.AddHours(-2),
-        EndTime = utcNow.AddHours(-1.5),
+        StartTime = Now.AddHours(-2),
+        EndTime = Now.AddHours(-1.5),
         Status = BroadCastStatus.BStatus.Pending,
         SchedulerId = schedulerUser.Id,
         ApproverId = approverUser.Id,
@@ -131,8 +131,8 @@ namespace TvBroadCast.DataAccess.Seed
     {
         Title = "Late Bulletin",
         Description = "Wrap-up of the day’s top stories.",
-        StartTime = utcNow.AddHours(2),
-        EndTime = utcNow.AddHours(2.5),
+        StartTime = Now.AddHours(2),
+        EndTime = Now.AddHours(2.5),
         Status = BroadCastStatus.BStatus.Approved,
         SchedulerId = schedulerUser.Id,
         ApproverId = approverUser.Id,
@@ -144,8 +144,8 @@ namespace TvBroadCast.DataAccess.Seed
     {
         Title = "Live Interview Segment",
         Description = "Conversation with industry leaders.",
-        StartTime = utcNow.AddMinutes(20),
-        EndTime = utcNow.AddMinutes(60),
+        StartTime = Now.AddMinutes(20),
+        EndTime = Now.AddMinutes(60),
         Status = BroadCastStatus.BStatus.Pending,
         SchedulerId = schedulerUser.Id,
         ApproverId = approverUser.Id,
@@ -157,8 +157,8 @@ namespace TvBroadCast.DataAccess.Seed
     {
         Title = "Trend Watch",
         Description = "Market movements and upcoming tech.",
-        StartTime = utcNow.AddMinutes(-45),
-        EndTime = utcNow.AddMinutes(-5),
+        StartTime = Now.AddMinutes(-45),
+        EndTime = Now.AddMinutes(-5),
         Status = BroadCastStatus.BStatus.Approved,
         SchedulerId = schedulerUser.Id,
         ApproverId = approverUser.Id,
@@ -170,8 +170,8 @@ namespace TvBroadCast.DataAccess.Seed
     {
         Title = "Extended Feature",
         Description = "In-depth documentary on climate change.",
-        StartTime = utcNow.AddHours(-2),
-        EndTime = utcNow.AddHours(2),
+        StartTime = Now.AddHours(-2),
+        EndTime = Now.AddHours(2),
         Status = BroadCastStatus.BStatus.Rejected,
         SchedulerId = schedulerUser.Id,
         ApproverId = approverUser.Id,
@@ -183,8 +183,8 @@ namespace TvBroadCast.DataAccess.Seed
     {
         Title = "Slot Edge Start",
         Description = "Starts at exact -2 hour mark.",
-        StartTime = utcNow.AddHours(-2),
-        EndTime = utcNow.AddHours(-1.5),
+        StartTime = Now.AddHours(-2),
+        EndTime = Now.AddHours(-1.5),
         Status = BroadCastStatus.BStatus.Approved,
         SchedulerId = schedulerUser.Id,
         ApproverId = approverUser.Id,
@@ -194,8 +194,8 @@ namespace TvBroadCast.DataAccess.Seed
     {
         Title = "Slot Edge End",
         Description = "Ends at exact +2 hour mark.",
-        StartTime = utcNow.AddHours(1.5),
-        EndTime = utcNow.AddHours(2),
+        StartTime = Now.AddHours(1.5),
+        EndTime = Now.AddHours(2),
         Status = BroadCastStatus.BStatus.Approved,
         SchedulerId = schedulerUser.Id,
         ApproverId = approverUser.Id,
@@ -207,8 +207,8 @@ namespace TvBroadCast.DataAccess.Seed
     {
         Title = "Future Forecast",
         Description = "Tomorrow’s predictions.",
-        StartTime = utcNow.AddHours(6),
-        EndTime = utcNow.AddHours(7),
+        StartTime = Now.AddHours(6),
+        EndTime =  Now.AddHours(7),
         Status = BroadCastStatus.BStatus.Pending,
         SchedulerId = schedulerUser.Id,
         ApproverId = approverUser.Id,

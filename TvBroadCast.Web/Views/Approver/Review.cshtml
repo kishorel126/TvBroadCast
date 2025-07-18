@@ -19,8 +19,18 @@
         <label for="Comment">Approver Comment (optional):</label>
         <input type="text" name="Comment" class="form-control" />
     </div>
-    <button type="button" id="approve-btn" class="btn btn-success">Approve</button>
-    <button type="button" id="reject-btn" class="btn btn-danger">Reject</button>
+    @if(Model.Status == TvBroadCast.Domain.Entities.BroadCastStatus.BStatus.Pending)
+    {
+        <button type="button" id="approve-btn" class="btn btn-success">Approve</button>
+        <button type="button" id="reject-btn" class="btn btn-danger">Reject</button>
+    }
+    else
+    {
+        <div class="alert alert-info mb-3">
+            This broadcast has already been @Model.Status.ToString().ToLower().
+        </div>
+    }
+    
     <a asp-action="Index" class="btn btn-secondary">Back</a>
 </form>
 @section Scripts {

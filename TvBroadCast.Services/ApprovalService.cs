@@ -46,7 +46,7 @@ namespace TvBroadCast.Services
             {
                 BroadcastId = broadcastId,
                 ApproverId = approverId,
-                Timestamp = DateTime.UtcNow,
+                Timestamp = DateTime.Now,
                 Status = BroadCastStatus.BStatus.Approved,
                 Comment = comment
             };
@@ -75,7 +75,7 @@ namespace TvBroadCast.Services
             {
                 BroadcastId = broadcast.Id,
                 ApproverId = approverId,
-                Timestamp = DateTime.UtcNow,
+                Timestamp = DateTime.Now,
                 Status = BroadCastStatus.BStatus.Rejected,
                 Comment = comment
             };

@@ -18,11 +18,17 @@ namespace TvBroadCast.Web.Controllers
             _broadCastService = broadCastService;
         }
 
-        // Loads the scheduler dashboard view (table and buttons only, no model)
+        
         [HttpGet]
         public IActionResult Index()
         {
-            return View();
+            var now = DateTime.Now;
+            var windowStart = now.AddHours(-2);
+            var windowEnd = now.AddHours(2.5);
+            var broadcasts = _broadCastService.GetBroadCastForTimeWindowAsync(windowStart, windowEnd);
+            ViewBag.WindowStart = windowStart;
+            ViewBag.WindowEnd = windowEnd;
+            return View(broadcasts);
         }
 
         // Loads the create form view (empty form)

@@ -10,11 +10,12 @@
         .ToList();
     bool isScheduler = User.IsInRole("Scheduler");
     bool isApprover = User.IsInRole("Approver");
+    var broadcasts = Model ?? new List<TvBroadCast.Domain.Entities.BroadCast>();
 }
 
 
 <tbody>
-    @foreach (var broadcast in Model)
+    @foreach (var broadcast in broadcasts)
     {
         <tr data-broadcastid="@broadcast.Id">
             <td>@broadcast.Title</td>
@@ -39,7 +40,7 @@
                     <button class="btn btn-sm btn-success approve-broadcast-btn">Approve</button>
                     <button class="btn btn-sm btn-danger reject-broadcast-btn">Reject</button>
                 }
-                <button class="btn btn-sm btn-info history-broadcast-btn">History</button>
+                @* <button class="btn btn-sm btn-info history-broadcast-btn">History</button> *@
             </td>
         </tr>
     }

@@ -73,8 +73,8 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(function () {
-            const windowStart = "@windowStart.ToString("o")";
-            const windowEnd = "@windowEnd.ToString("o")";
+            const windowStart = "@windowStart.ToString("")";
+            const windowEnd = "@windowEnd.ToString("")";
 
             function refreshScheduleTable() {
                 $.get("/Broadcast/GetSchedule", { windowStart, windowEnd }, function (data) {
@@ -93,7 +93,7 @@
             });
 
             // Auto-refresh every 1 minute 
-            setInterval(refreshScheduleTable, 6000);
+            setInterval(refreshScheduleTable, 60000);
 
             // Initial auto-load when page loads
             refreshScheduleTable();
