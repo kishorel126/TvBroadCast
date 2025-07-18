@@ -26,7 +26,7 @@ namespace TvBroadCast.DataAccess.Repositories
 
         public async Task<BroadCast?> GetBroadCastByIdAsync(int id)
         {
-            return await _context.BroadCasts.FirstOrDefaultAsync(b => b.Id == id);
+            return _context.BroadCasts.FirstOrDefault(b => b.Id == id);
         }
 
         public async Task AddAsync(BroadCast broadCast)
@@ -53,7 +53,7 @@ namespace TvBroadCast.DataAccess.Repositories
         public async Task<bool> IsOverlappingAsync(DateTime start , DateTime end , int? excludeId = null)
         {
 
-            return await _context.BroadCasts.AnyAsync(b =>
+            return  _context.BroadCasts.Any(b =>
                 b.StartTime < end && b.EndTime > start && (excludeId == null || b.Id != excludeId)
             );
 

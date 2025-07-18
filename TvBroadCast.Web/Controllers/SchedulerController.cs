@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using System.Linq;
 using TvBroadCast.Domain.Entities;
 using TvBroadCast.Domain.Interfaces.IBroadCast;
 
@@ -17,59 +18,92 @@ namespace TvBroadCast.Web.Controllers
             _broadCastService = broadCastService;
         }
 
-        public async Task<IActionResult> Index()
+        // Loads the scheduler dashboard view (table and buttons only, no model)
+        [HttpGet]
+        public IActionResult Index()
         {
-            var schedulerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            
-            var broadcasts = (await _broadCastService.GetAllAsync()).Where(b => b.SchedulerId == schedulerId);
-
-            return View(broadcasts);
+            return View();
         }
 
+        // Loads the create form view (empty form)
+        [HttpGet]
         public IActionResult Create()
         {
-            return View();
+            return View(new BroadCast());
         }
-        // AJAX: Add a broadcast
-        [HttpPost]
-        public async Task<IActionResult> Add([FromBody] BroadCast model)
+
+        // Loads the edit form view (form pre-populated by AJAX)
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
         {
+            var broadcast = await _broadCastService.GetBroadCastByIdAsync(id);
+            if (broadcast == null)
+                return NotFound();
+
+            return View(broadcast);
+        }
+
+        // Returns all broadcasts for the current scheduler as JSON (AJAX)
+        [HttpGet]
+        public async Task<IActionResult> GetMyBroadcasts()
+        {
+            var schedulerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var broadcasts = (await _broadCastService.GetAllAsync())
+                .Where(b => b.SchedulerId == schedulerId)
+                .OrderByDescending(b => b.StartTime)
+                .ToList();
+            return Json(new { success = true, data = broadcasts });
+        }
+
+        // Creates a broadcast via AJAX (returns JSON)
+        [HttpPost]
+        public async Task<IActionResult> CreateBroadcast([FromBody] BroadCast model)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors)
+                                              .Select(e => e.ErrorMessage).ToList();
+                return Json(new { success = false, errors });
+            }
+
             model.SchedulerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var result = await _broadCastService.AddBroadCastAsync(model);
+
             if (result.Success)
-                return Ok(new { success = true });
-            return BadRequest(new { success = false, error = result.Error });
+                return Json(new { success = true, message = "Broadcast added successfully." });
+
+            return Json(new { success = false, error = result.Error });
         }
 
-        public IActionResult Edit()
-        {
-            return View();
-        }
-        // AJAX: Edit a broadcast
+        // Updates a broadcast via AJAX (returns JSON)
         [HttpPost]
-        public async Task<IActionResult> Edit([FromBody] BroadCast model)
+        public async Task<IActionResult> EditBroadcast([FromBody] BroadCast model)
         {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors)
+                                              .Select(e => e.ErrorMessage).ToList();
+                return Json(new { success = false, errors });
+            }
+
             model.SchedulerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var result = await _broadCastService.UpdateBroadCastAsync(model);
+
             if (result.Success)
-                return Ok(new { success = true });
-            return BadRequest(new { success = false, error = result.Error });
+                return Json(new { success = true, message = "Broadcast updated successfully." });
+
+            return Json(new { success = false, error = result.Error });
         }
 
-
-        public IActionResult Delete()
-        {
-            return View();
-        }
-
-        // AJAX: Delete a broadcast
+        // Deletes a broadcast via AJAX (returns JSON)
         [HttpPost]
-        public async Task<IActionResult> Delete([FromBody] int id)
+        public async Task<IActionResult> DeleteBroadcast([FromBody] int id)
         {
             var result = await _broadCastService.DeleteBroadCastAsync(id);
             if (result.Success)
-                return Ok(new { success = true });
-            return BadRequest(new { success = false, error = "Failed to delete broadcast." });
+                return Json(new { success = true, message = "Broadcast deleted successfully." });
+
+            return Json(new { success = false, error = "Failed to delete broadcast." });
         }
     }
 }

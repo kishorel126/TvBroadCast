@@ -2,23 +2,54 @@
 @{
     ViewBag.Title = "Review Broadcast";
 }
-<h2>Review: @Model.Title</h2>
-<p><strong>Description:</strong> @Model.Description</p>
-<p><strong>Time:</strong> @Model.StartTime - @Model.EndTime</p>
-<form asp-action="Approve" method="post" class="mb-2">
-    <input type="hidden" name="id" value="@Model.Id" />
-    <div class="form-group">
-        <label>Approval Comment:</label>
-        <input type="text" name="comment" class="form-control" />
+<h2>Review Broadcast</h2>
+<div id="result-message"></div>
+<div class="card mb-3">
+    <div class="card-body">
+        <h4>@Model.Title</h4>
+        <p><strong>Description:</strong> @Model.Description</p>
+        <p><strong>Start:</strong> @Model.StartTime</p>
+        <p><strong>End:</strong> @Model.EndTime</p>
+        <p><strong>Status:</strong> @Model.Status</p>
     </div>
-    <button type="submit" class="btn btn-success">Approve</button>
-</form>
-<form asp-action="Reject" method="post">
-    <input type="hidden" name="id" value="@Model.Id" />
+</div>
+<form id="review-form">
+    <input type="hidden" name="BroadcastId" value="@Model.Id" />
     <div class="form-group">
-        <label>Rejection Comment:</label>
-        <input type="text" name="comment" class="form-control" />
+        <label for="Comment">Approver Comment (optional):</label>
+        <input type="text" name="Comment" class="form-control" />
     </div>
-    <button type="submit" class="btn btn-danger">Reject</button>
+    <button type="button" id="approve-btn" class="btn btn-success">Approve</button>
+    <button type="button" id="reject-btn" class="btn btn-danger">Reject</button>
+    <a asp-action="Index" class="btn btn-secondary">Back</a>
 </form>
-<a asp-action="Index" class="btn btn-secondary mt-2">Back to List</a>
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function submitReview(action) {
+            var data = {
+                BroadcastId: $("input[name='BroadcastId']").val(),
+                Comment: $("input[name='Comment']").val()
+            };
+            $.ajax({
+                url: action === "approve" ? '@Url.Action("Approve", "Approver")' : '@Url.Action("Reject", "Approver")',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function (res) {
+                    if (res.success) {
+                        $("#result-message").html('<div class="alert alert-success">Broadcast ' + (action === "approve" ? 'approved' : 'rejected') + ' successfully.</div>');
+                        setTimeout(function () { window.location.href = '@Url.Action("Index", "Approver")'; }, 1200);
+                    } else {
+                        $("#result-message").html('<div class="alert alert-danger">' + (res.error || 'Error occurred') + '</div>');
+                    }
+                },
+                error: function () {
+                    $("#result-message").html('<div class="alert alert-danger">Server error occurred.</div>');
+                }
+            });
+        }
+        $("#approve-btn").click(function () { submitReview("approve"); });
+        $("#reject-btn").click(function () { submitReview("reject"); });
+    </script>
+}

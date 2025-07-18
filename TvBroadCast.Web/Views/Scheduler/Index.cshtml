@@ -1,32 +1,100 @@
-﻿@model IEnumerable<TvBroadCast.Domain.Entities.BroadCast>
-@{
+﻿@{
     ViewBag.Title = "My Broadcasts";
 }
 <h2>My Broadcasts</h2>
 <a href="@Url.Action("Create")" class="btn btn-primary mb-2">Add New Broadcast</a>
-<table class="table table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>Title</th>
-            <th>Start</th>
-            <th>End</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var b in Model)
-        {
+<div id="broadcast-table-container">
+    <table class="table table-bordered table-striped" id="broadcasts-table">
+        <thead>
             <tr>
-                <td>@b.Title</td>
-                <td>@b.StartTime</td>
-                <td>@b.EndTime</td>
-                <td>@b.Status</td>
-                <td>
-                    <a href="@Url.Action("Edit", new { id = b.Id })" class="btn btn-sm btn-info">Edit</a>
-                    <a href="@Url.Action("Delete", new { id = b.Id })" class="btn btn-sm btn-danger">Delete</a>
-                </td>
+                <th>Title</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Status</th>
+                <th>Actions</th>
             </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</div>
+
+<!-- Placeholder for result messages -->
+<div id="result-message"></div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function formatDateTime(dtString) {
+            // Try to present the datetime in a readable format (fallback to original)
+            try {
+                var dt = new Date(dtString);
+                return dt.toLocaleString();
+            } catch {
+                return dtString;
+            }
         }
-    </tbody>
-</table>
+
+        function loadBroadcasts() {
+            $.ajax({
+                url: '@Url.Action("GetMyBroadcasts", "Scheduler")',
+                type: 'GET',
+                dataType: 'json',
+                success: function (res) {
+                    const tbody = $("#broadcasts-table tbody");
+                    tbody.empty();
+                    if (res.success && res.data && res.data.length > 0) {
+                        res.data.forEach(function (b) {
+                            tbody.append(`
+                                <tr>
+                                    <td>${b.title}</td>
+                                    <td>${formatDateTime(b.startTime)}</td>
+                                    <td>${formatDateTime(b.endTime)}</td>
+                                    <td>${b.status}</td>
+                                    <td>
+                                        <a href="@Url.Action("Edit", "Scheduler")?id=${b.id}" class="btn btn-sm btn-info edit-btn" data-id="${b.id}">Edit</a>
+                                        <button class="btn btn-sm btn-danger delete-btn" data-id="${b.id}">Delete</button>
+                                    </td>
+                                </tr>
+                            `);
+                        });
+                    } else {
+                        tbody.append('<tr><td colspan="5" class="text-center">No broadcasts found.</td></tr>');
+                    }
+                },
+                error: function () {
+                    alert("Error loading broadcasts.");
+                }
+            });
+        }
+
+        // Handle Delete button click (AJAX)
+        $(document).on('click', '.delete-btn', function (e) {
+            e.preventDefault();
+            var id = $(this).data('id');
+            if (confirm('Are you sure you want to delete this broadcast?')) {
+                $.ajax({
+                    url: '@Url.Action("DeleteBroadcast", "Scheduler")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(id),
+                    success: function (res) {
+                        if (res.success) {
+                            $("#result-message").html('<div class="alert alert-success">' + res.message + '</div>');
+                            loadBroadcasts();
+                        } else {
+                            $("#result-message").html('<div class="alert alert-danger">' + (res.error || "Delete failed.") + '</div>');
+                        }
+                    },
+                    error: function () {
+                        $("#result-message").html('<div class="alert alert-danger">Delete request failed.</div>');
+                    }
+                });
+            }
+        });
+
+        $(document).ready(function () {
+            loadBroadcasts();
+        });
+    </script>
+}

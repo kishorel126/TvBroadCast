@@ -1,5 +1,85 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model TvBroadCast.Domain.Entities.BroadCast
 @{
+    ViewBag.Title = "Edit Broadcast";
+}
+<h2>Edit Broadcast</h2>
+<div id="result-message"></div>
+<form id="edit-form" autocomplete="off">
+    <input type="hidden" asp-for="Id" />
+    <div class="form-group">
+        <label asp-for="Title"></label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Description"></label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="StartTime"></label>
+        <input asp-for="StartTime" type="datetime-local" class="form-control" />
+        <span asp-validation-for="StartTime" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="EndTime"></label>
+        <input asp-for="EndTime" type="datetime-local" class="form-control" />
+        <span asp-validation-for="EndTime" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function toISO(input) {
+            // Handles datetime-local conversion to ISO (UTC)
+            if (!input) return null;
+            if (input.endsWith('Z') || input.indexOf('T') >= 0) return input;
+            return input.replace(' ', 'T') + (input.length === 16 ? ":00" : "");
+        }
+
+        $(function () {
+            // If model has StartTime/EndTime, ensure input fields are formatted for datetime-local
+            var startVal = '@Model.StartTime.ToString("yyyy-MM-ddTHH:mm")';
+            var endVal = '@Model.EndTime.ToString("yyyy-MM-ddTHH:mm")';
+            $('#StartTime').val(startVal);
+            $('#EndTime').val(endVal);
+
+            $("#edit-form").submit(function (e) {
+                e.preventDefault();
+
+                var form = $(this);
+                var data = {
+                    Id: form.find("[name='Id']").val(),
+                    Title: form.find("[name='Title']").val(),
+                    Description: form.find("[name='Description']").val(),
+                    StartTime: toISO(form.find("[name='StartTime']").val()),
+                    EndTime: toISO(form.find("[name='EndTime']").val())
+                };
+
+                $.ajax({
+                    url: '@Url.Action("EditBroadcast", "Scheduler")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    success: function (res) {
+                        if (res.success) {
+                            $("#result-message").html('<div class="alert alert-success">' + res.message + '</div>');
+                            setTimeout(function () { window.location.href = '@Url.Action("Index", "Scheduler")'; }, 1200);
+                        } else {
+                            let errorMsg = res.error || (res.errors ? res.errors.join("<br>") : "Unknown error");
+                            $("#result-message").html('<div class="alert alert-danger">' + errorMsg + '</div>');
+                        }
+                    },
+                    error: function () {
+                        $("#result-message").html('<div class="alert alert-danger">Server error occurred.</div>');
+                    }
+                });
+            });
+        });
+    </script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

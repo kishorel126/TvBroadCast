@@ -3,11 +3,43 @@
     ViewBag.Title = "Delete Broadcast";
 }
 <h2>Delete Broadcast</h2>
+<div id="result-message"></div>
 <div>
     <p>Are you sure you want to delete <strong>@Model.Title</strong>?</p>
-    <form asp-action="DeleteConfirmed" method="post">
+    <form id="delete-form">
         <input type="hidden" name="id" value="@Model.Id" />
         <button type="submit" class="btn btn-danger">Yes, Delete</button>
         <a asp-action="Index" class="btn btn-secondary">Cancel</a>
     </form>
 </div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(function () {
+            $("#delete-form").submit(function (e) {
+                e.preventDefault();
+
+                var id = $("input[name='id']").val();
+
+                $.ajax({
+                    url: '@Url.Action("DeleteBroadcast", "Scheduler")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(id),
+                    success: function (res) {
+                        if (res.success) {
+                            $("#result-message").html('<div class="alert alert-success">' + res.message + '</div>');
+                            setTimeout(function () { window.location.href = '@Url.Action("Index", "Scheduler")'; }, 1200);
+                        } else {
+                            $("#result-message").html('<div class="alert alert-danger">' + (res.error || "Delete failed.") + '</div>');
+                        }
+                    },
+                    error: function () {
+                        $("#result-message").html('<div class="alert alert-danger">Server error occurred.</div>');
+                    }
+                });
+            });
+        });
+    </script>
+}

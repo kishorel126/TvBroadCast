@@ -14,23 +14,28 @@ namespace TvBroadCast.Web.Controllers
         private readonly IApprovalService _approvalService;
         private readonly IBroadCastService _broadCastService;
 
-        public ApproverController(IApprovalService approvalService , IBroadCastService broadCastService )
+        public ApproverController(IApprovalService approvalService, IBroadCastService broadCastService)
         {
             _approvalService = approvalService;
             _broadCastService = broadCastService;
         }
 
-
+        // List all broadcasts (you can filter as needed)
         public async Task<IActionResult> Index()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-
             var broadcasts = (await _broadCastService.GetAllAsync());
-                //.Where(b => b.Status == BroadCastStatus.BStatus.Pending && b.ApproverId == userId)
-                //.ToList();
-
             return View(broadcasts);
+        }
+
+        // REVIEW PAGE (GET)
+        [HttpGet]
+        public async Task<IActionResult> Review(int id)
+        {
+            var broadcast = await _broadCastService.GetBroadCastByIdAsync(id);
+            if (broadcast == null)
+                return NotFound();
+            return View("Review", broadcast);
         }
 
         // AJAX: Approve a broadcast

@@ -3,7 +3,8 @@
     ViewBag.Title = "Add Broadcast";
 }
 <h2>Add Broadcast</h2>
-<form asp-action="Create" method="post">
+<div id="result-message"></div>
+<form id="create-form" autocomplete="off">
     <div class="form-group">
         <label asp-for="Title"></label>
         <input asp-for="Title" class="form-control" />
@@ -28,6 +29,53 @@
     <a asp-action="Index" class="btn btn-secondary">Cancel</a>
 </form>
 @section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(function () {
+            $("#create-form").submit(function (e) {
+                e.preventDefault();
+
+                var form = $(this);
+
+                // Convert datetime-local input to ISO string for backend compatibility
+                function toISO(input) {
+                    var val = form.find("[name='" + input + "']").val();
+                    // If empty, return null
+                    if (!val) return null;
+                    // If it ends with 'Z' or includes 'T', it's likely ISO already
+                    if (val.endsWith('Z') || val.indexOf('T') >= 0) return val;
+                    // Otherwise, replace space with T and append :00 if needed
+                    return val.replace(' ', 'T') + (val.length === 16 ? ":00" : "");
+                }
+
+                var data = {
+                    Title: form.find("[name='Title']").val(),
+                    Description: form.find("[name='Description']").val(),
+                    StartTime: toISO('StartTime'),
+                    EndTime: toISO('EndTime')
+                };
+
+                $.ajax({
+                    url: '@Url.Action("CreateBroadcast", "Scheduler")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    success: function (res) {
+                        if (res.success) {
+                            $("#result-message").html('<div class="alert alert-success">' + res.message + '</div>');
+                            setTimeout(function () { window.location.href = '@Url.Action("Index", "Scheduler")'; }, 1200);
+                        } else {
+                            let errorMsg = res.error || (res.errors ? res.errors.join("<br>") : "Unknown error");
+                            $("#result-message").html('<div class="alert alert-danger">' + errorMsg + '</div>');
+                        }
+                    },
+                    error: function () {
+                        $("#result-message").html('<div class="alert alert-danger">Server error occurred.</div>');
+                    }
+                });
+            });
+        });
+    </script>
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
